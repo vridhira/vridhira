@@ -32,34 +32,6 @@ export function Header() {
           </Link>
         </div>
 
-        {/* Mobile Nav Trigger */}
-        <div className="flex items-center md:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="mr-2">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">Toggle Menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="pr-0">
-                <Link href="/" className="mb-6 flex items-center">
-                  <Logo />
-                </Link>
-                <div className="flex flex-col space-y-3">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="text-lg font-medium text-foreground hover:text-foreground/80"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
-        </div>
-        
         {/* Center Section: Search (Desktop) */}
         <div className="hidden md:flex flex-1 justify-center">
           <div className="w-full max-w-sm">
@@ -81,7 +53,7 @@ export function Header() {
             <NavigationMenuList>
               {navLinks.map((link) => (
                 <NavigationMenuItem key={link.href}>
-                  <Link href={link.href} passHref legacyBehavior>
+                  <Link href={link.href} passHref>
                     <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                       <a>{link.label}</a>
                     </NavigationMenuLink>
@@ -106,7 +78,7 @@ export function Header() {
           </nav>
         </div>
         
-        {/* Mobile Search, Cart, Account - shown next to hamburger */}
+        {/* Mobile Menu and Actions */}
         <div className="flex items-center md:hidden">
           <nav className="flex items-center space-x-1">
             <Link href="/cart">
@@ -122,6 +94,27 @@ export function Header() {
               </Button>
             </Link>
           </nav>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="ml-2">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="top" className="w-full bg-background/80 backdrop-blur-lg">
+              <div className="flex flex-col items-center space-y-6 pt-10">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-2xl font-semibold text-foreground hover:text-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
       </div>
