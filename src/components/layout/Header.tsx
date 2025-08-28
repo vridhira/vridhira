@@ -24,28 +24,16 @@ const navLinks = [
 export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg">
-      <div className="container flex h-24 items-center">
-        <div className="mr-auto hidden md:flex">
+      <div className="container flex h-24 items-center justify-between">
+        {/* Left Section: Logo */}
+        <div className="flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Logo />
           </Link>
-          <NavigationMenu>
-            <NavigationMenuList>
-              {navLinks.map((link) => (
-                <NavigationMenuItem key={link.href}>
-                  <Link href={link.href} passHref>
-                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                      {link.label}
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
         </div>
 
-        {/* Mobile Nav */}
-        <div className="flex items-center md:hidden mr-auto">
+        {/* Mobile Nav Trigger */}
+        <div className="flex items-center md:hidden">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="mr-2">
@@ -70,23 +58,38 @@ export function Header() {
                 </div>
               </SheetContent>
             </Sheet>
-            <Link href="/" className="flex items-center space-x-2">
-                <Logo />
-            </Link>
         </div>
-
-        <div className="flex items-center justify-end space-x-2">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
+        
+        {/* Center Section: Search (Desktop) */}
+        <div className="hidden md:flex flex-1 justify-center">
+          <div className="w-full max-w-sm">
             <form>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  className="w-full pl-9 md:w-[250px] lg:w-[300px] font-headline"
+                  className="w-full pl-9 font-headline"
                 />
               </div>
             </form>
           </div>
+        </div>
+
+        {/* Right Section: Nav and Actions (Desktop) */}
+        <div className="hidden md:flex items-center justify-end space-x-4">
+          <NavigationMenu>
+            <NavigationMenuList>
+              {navLinks.map((link) => (
+                <NavigationMenuItem key={link.href}>
+                  <Link href={link.href} passHref legacyBehavior>
+                    <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                      <a>{link.label}</a>
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
           <nav className="flex items-center space-x-1">
             <Link href="/cart">
               <Button variant="ghost" size="icon">
@@ -102,6 +105,25 @@ export function Header() {
             </Link>
           </nav>
         </div>
+        
+        {/* Mobile Search, Cart, Account - shown next to hamburger */}
+        <div className="flex items-center md:hidden">
+          <nav className="flex items-center space-x-1">
+            <Link href="/cart">
+              <Button variant="ghost" size="icon">
+                <ShoppingCart className="h-5 w-5" />
+                <span className="sr-only">Shopping Cart</span>
+              </Button>
+            </Link>
+            <Link href="/login">
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Account</span>
+              </Button>
+            </Link>
+          </nav>
+        </div>
+
       </div>
     </header>
   )
