@@ -16,10 +16,10 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative w-full h-[60vh] md:h-[70vh]">
         <div className="container mx-auto flex flex-col items-center justify-center h-full text-center z-10 relative">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white font-headline">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground font-headline">
             Handcrafted with Heart & Soul
           </h1>
-          <p className="mt-4 max-w-2xl text-lg md:text-xl text-white/80">
+          <p className="mt-4 max-w-2xl text-lg md:text-xl text-muted-foreground">
             Discover unique creations from India's most talented artisans.
           </p>
           <Button asChild size="lg" className="mt-8">
@@ -30,7 +30,7 @@ export default function Home() {
           src="https://picsum.photos/1600/900?pottery"
           alt="Artisan crafting a pot"
           fill
-          className="object-cover brightness-75"
+          className="object-cover"
           priority
           data-ai-hint="pottery making"
         />
@@ -91,9 +91,9 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {featuredArtisans.map((artisan) => (
-              <Card key={artisan.id} className="overflow-hidden transition-shadow hover:shadow-lg bg-card">
+              <Card key={artisan.id} className="overflow-hidden transition-shadow hover:shadow-lg">
                 <div className="flex flex-col sm:flex-row items-center p-6 gap-6">
-                  <Avatar className="h-24 w-24 border-4 border-primary/20">
+                  <Avatar className="h-24 w-24 border-4 border-primary/10">
                     <AvatarImage src={artisan.profileImage} alt={artisan.name} data-ai-hint="artisan portrait" />
                     <AvatarFallback>{artisan.name.charAt(0)}</AvatarFallback>
                   </Avatar>

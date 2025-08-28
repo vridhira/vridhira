@@ -64,7 +64,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               {product.reviewCount} reviews
             </span>
           </div>
-          <p className="mt-4 text-3xl font-bold text-primary">${product.price.toFixed(2)}</p>
+          <p className="mt-4 text-3xl font-bold text-foreground">${product.price.toFixed(2)}</p>
           <Separator className="my-6" />
           <p className="text-base text-foreground/80 leading-relaxed">{product.description}</p>
           <div className="mt-8">

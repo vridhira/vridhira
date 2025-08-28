@@ -15,7 +15,7 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
         fontFamily="Inter, sans-serif"
         fontSize="30"
         fontWeight="bold"
-        fill="hsl(var(--primary))"
+        fill="hsl(var(--foreground))"
         className="font-headline"
       >
         VRIDHIRA

@@ -23,7 +23,7 @@ const navLinks = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur-lg">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg">
       <div className="container flex h-24 items-center">
         {/* Left Section: Logo */}
         <div className="flex-1 md:flex-none">
@@ -54,7 +54,7 @@ export function Header() {
             <NavigationMenuList>
               {navLinks.map((link) => (
                 <NavigationMenuItem key={link.href}>
-                  <Link href={link.href} passHref asChild>
+                  <Link href={link.href} passHref legacyBehavior>
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                       {link.label}
                     </NavigationMenuLink>
