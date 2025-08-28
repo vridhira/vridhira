@@ -23,7 +23,7 @@ export default function Home() {
           <p className="mt-4 max-w-2xl text-lg md:text-xl text-gray-200">
             Discover unique creations from India's most talented artisans.
           </p>
-          <Button asChild size="lg" className="mt-8">
+          <Button asChild size="lg" className="mt-8" variant="accent">
             <Link href="/products">Explore Collection</Link>
           </Button>
         </div>
@@ -124,7 +124,7 @@ export default function Home() {
           <p className="text-lg text-muted-foreground">
             To empower local artisans by connecting them to a global market, preserving traditional crafts, and celebrating the rich cultural heritage of India.
           </p>
-          <Button asChild variant="default" size="lg" className="mt-8">
+          <Button asChild variant="accent" size="lg" className="mt-8">
             <Link href="/sell">Join as a Seller</Link>
           </Button>
         </div>
