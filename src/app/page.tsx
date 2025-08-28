@@ -30,14 +30,14 @@ export default function Home() {
           src="https://picsum.photos/1600/900?pottery"
           alt="Artisan crafting a pot"
           fill
-          className="object-cover brightness-50"
+          className="object-cover brightness-75"
           priority
           data-ai-hint="pottery making"
         />
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="py-16 md:py-24 bg-transparent">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-10 font-headline">
             Best-Selling Products
@@ -58,7 +58,7 @@ export default function Home() {
       </section>
 
       {/* Categories Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-transparent">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-10 font-headline">
             Shop by Category
@@ -84,7 +84,7 @@ export default function Home() {
       </section>
 
       {/* Featured Artisans Section */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="py-16 md:py-24 bg-transparent">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-10 font-headline">
             Meet Our Artisans
@@ -117,7 +117,7 @@ export default function Home() {
       </section>
 
       {/* Mission Section */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="py-16 md:py-24 bg-transparent">
         <div className="container mx-auto text-center max-w-3xl">
           <h2 className="text-3xl font-bold tracking-tight mb-4 font-headline">Our Mission</h2>
           <p className="text-lg text-muted-foreground">
