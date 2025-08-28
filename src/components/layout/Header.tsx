@@ -26,14 +26,14 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg">
       <div className="container flex h-24 items-center">
         {/* Left Section: Logo */}
-        <div className="flex-1 md:flex-none">
+        <div className="flex-none">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Logo />
           </Link>
         </div>
 
         {/* Center Section: Search (Desktop) */}
-        <div className="hidden md:flex flex-1 justify-center">
+        <div className="flex flex-1 justify-center">
           <div className="w-full max-w-sm">
             <form>
               <div className="relative">
@@ -49,12 +49,12 @@ export function Header() {
         </div>
 
         {/* Right Section: Nav and Actions */}
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex items-center justify-end space-x-2">
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
               {navLinks.map((link) => (
                 <NavigationMenuItem key={link.href}>
-                  <Link href={link.href} passHref legacyBehavior>
+                  <Link href={link.href} legacyBehavior passHref>
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                       {link.label}
                     </NavigationMenuLink>
