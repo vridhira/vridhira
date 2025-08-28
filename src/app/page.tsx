@@ -14,30 +14,30 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative w-full h-[60vh] md:h-[70vh] bg-gradient-to-r from-primary/20 to-accent/20">
+      <section className="relative w-full h-[60vh] md:h-[70vh]">
+        <div className="container mx-auto flex flex-col items-center justify-center h-full text-center z-10 relative">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground font-headline">
+            Handcrafted with Heart & Soul
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg md:text-xl text-muted-foreground">
+            Discover unique creations from India's most talented artisans.
+          </p>
+          <Button asChild size="lg" className="mt-8">
+            <Link href="/products">Explore Collection</Link>
+          </Button>
+        </div>
         <Image
           src="https://picsum.photos/1600/900"
           alt="Artisan crafting a pot"
           fill
-          className="object-cover -z-10 opacity-30"
+          className="object-cover opacity-20"
           priority
           data-ai-hint="artisan craft"
         />
-        <div className="container mx-auto flex flex-col items-center justify-center h-full text-center">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-primary-foreground bg-primary/70 p-4 rounded-lg shadow-xl font-headline">
-            Handcrafted with Heart & Soul
-          </h1>
-          <p className="mt-4 max-w-2xl text-lg md:text-xl text-foreground/90 bg-background/70 p-2 rounded">
-            Discover unique creations from India's most talented artisans.
-          </p>
-          <Button asChild size="lg" className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90">
-            <Link href="/products">Explore Collection</Link>
-          </Button>
-        </div>
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-muted">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-10 font-headline">
             Best-Selling Products
@@ -58,7 +58,7 @@ export default function Home() {
       </section>
 
       {/* Categories Section */}
-      <section className="py-16 md:py-24 bg-muted">
+      <section className="py-16 md:py-24">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-10 font-headline">
             Shop by Category
@@ -84,14 +84,14 @@ export default function Home() {
       </section>
 
       {/* Featured Artisans Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-muted">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-10 font-headline">
             Meet Our Artisans
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {featuredArtisans.map((artisan) => (
-              <Card key={artisan.id} className="overflow-hidden transition-shadow hover:shadow-lg">
+              <Card key={artisan.id} className="overflow-hidden transition-shadow hover:shadow-lg bg-card">
                 <div className="flex flex-col sm:flex-row items-center p-6 gap-6">
                   <Avatar className="h-24 w-24 border-4 border-primary/20">
                     <AvatarImage src={artisan.profileImage} alt={artisan.name} data-ai-hint="artisan portrait" />
@@ -117,13 +117,13 @@ export default function Home() {
       </section>
 
       {/* Mission Section */}
-      <section className="py-16 md:py-24 bg-primary text-primary-foreground">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto text-center max-w-3xl">
           <h2 className="text-3xl font-bold tracking-tight mb-4 font-headline">Our Mission</h2>
-          <p className="text-lg text-primary-foreground/80">
+          <p className="text-lg text-muted-foreground">
             To empower local artisans by connecting them to a global market, preserving traditional crafts, and celebrating the rich cultural heritage of India.
           </p>
-          <Button asChild variant="secondary" size="lg" className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90">
+          <Button asChild variant="default" size="lg" className="mt-8">
             <Link href="/sell">Join as a Seller</Link>
           </Button>
         </div>

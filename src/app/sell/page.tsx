@@ -55,7 +55,7 @@ export default function SellPage() {
                 <Label htmlFor="message">Tell Us About Yourself</Label>
                 <Textarea id="message" placeholder="A brief introduction to you and your work." />
               </div>
-              <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90">Register Now</Button>
+              <Button type="submit" className="w-full">Register Now</Button>
             </form>
           </CardContent>
         </Card>
