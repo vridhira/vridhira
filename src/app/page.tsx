@@ -23,7 +23,7 @@ export default function Home() {
           <p className="mt-4 max-w-2xl text-lg md:text-xl text-gray-200">
             Discover unique creations from India's most talented artisans.
           </p>
-          <Button asChild size="lg" className="mt-8" variant="accent">
+          <Button asChild size="lg" className="mt-8 bg-white/10 text-white backdrop-blur-sm border border-white/20 hover:bg-white/20 active:scale-95 transition-all" variant="outline">
             <Link href="/products">Explore Collection</Link>
           </Button>
         </div>
