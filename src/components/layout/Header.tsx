@@ -25,7 +25,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg">
       <div className="container flex h-24 items-center">
-        <div className="mr-4 hidden md:flex">
+        <div className="mr-auto hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Logo />
           </Link>
@@ -33,9 +33,9 @@ export function Header() {
             <NavigationMenuList>
               {navLinks.map((link) => (
                 <NavigationMenuItem key={link.href}>
-                  <Link href={link.href} legacyBehavior passHref>
-                    <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                      <a>{link.label}</a>
+                  <Link href={link.href} passHref>
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      {link.label}
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
@@ -45,7 +45,7 @@ export function Header() {
         </div>
 
         {/* Mobile Nav */}
-        <div className="flex items-center md:hidden">
+        <div className="flex items-center md:hidden mr-auto">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="mr-2">
@@ -75,7 +75,7 @@ export function Header() {
             </Link>
         </div>
 
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+        <div className="flex items-center justify-end space-x-2">
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <form>
               <div className="relative">
