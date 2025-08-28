@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative w-full h-[60vh] md:h-[70vh]">
+      <section className="relative w-full h-[70vh]">
         <div className="absolute inset-0 bg-black/30 z-10" />
         <div className="container mx-auto flex flex-col items-center justify-center h-full text-center z-20 relative">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-gray-200 font-headline">
@@ -32,7 +32,6 @@ export default function Home() {
           alt="Artisan crafting a pot"
           fill
           className="object-cover"
-          priority
           data-ai-hint="pottery making"
         />
       </section>
