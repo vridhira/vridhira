@@ -23,8 +23,8 @@ const navLinks = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
-      <div className="container flex h-20 items-center">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg">
+      <div className="container flex h-24 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Logo />
@@ -83,7 +83,7 @@ export function Header() {
                 <Input
                   type="search"
                   placeholder="Search products..."
-                  className="w-full pl-9 md:w-[250px] lg:w-[300px]"
+                  className="w-full pl-9 md:w-[250px] lg:w-[300px] font-headline"
                 />
               </div>
             </form>
