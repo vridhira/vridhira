@@ -16,10 +16,10 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative w-full h-[60vh] md:h-[70vh]">
         <div className="container mx-auto flex flex-col items-center justify-center h-full text-center z-10 relative">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground font-headline">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white font-headline">
             Handcrafted with Heart & Soul
           </h1>
-          <p className="mt-4 max-w-2xl text-lg md:text-xl text-muted-foreground">
+          <p className="mt-4 max-w-2xl text-lg md:text-xl text-white/80">
             Discover unique creations from India's most talented artisans.
           </p>
           <Button asChild size="lg" className="mt-8">
@@ -27,17 +27,17 @@ export default function Home() {
           </Button>
         </div>
         <Image
-          src="https://picsum.photos/1600/900"
+          src="https://picsum.photos/1600/900?pottery"
           alt="Artisan crafting a pot"
           fill
-          className="object-cover opacity-20"
+          className="object-cover brightness-50"
           priority
-          data-ai-hint="artisan craft"
+          data-ai-hint="pottery making"
         />
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-16 md:py-24 bg-muted">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-10 font-headline">
             Best-Selling Products
@@ -84,7 +84,7 @@ export default function Home() {
       </section>
 
       {/* Featured Artisans Section */}
-      <section className="py-16 md:py-24 bg-muted">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-10 font-headline">
             Meet Our Artisans
