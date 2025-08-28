@@ -53,7 +53,7 @@ export function Header() {
             <NavigationMenuList>
               {navLinks.map((link) => (
                 <NavigationMenuItem key={link.href}>
-                  <Link href={link.href} passHref>
+                  <Link href={link.href} passHref legacyBehavior>
                     <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                       <a>{link.label}</a>
                     </NavigationMenuLink>
@@ -101,7 +101,7 @@ export function Header() {
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="top" className="w-full bg-background/80 backdrop-blur-lg">
+            <SheetContent side="top" className="w-full bg-background/95 backdrop-blur-md">
               <div className="flex flex-col items-center space-y-6 pt-10">
                 {navLinks.map((link) => (
                   <Link
