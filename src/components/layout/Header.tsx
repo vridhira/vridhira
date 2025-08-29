@@ -53,7 +53,7 @@ export function Header() {
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
               {navLinks.map((link) => (
-                <NavigationMenuItem key={link.href}>
+                 <NavigationMenuItem key={link.href}>
                   <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                      <Link href={link.href}>
                       {link.label}
@@ -105,18 +105,18 @@ export function Header() {
                 <SheetHeader>
                   <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                 </SheetHeader>
-                 <NavigationMenu orientation="vertical" className="flex max-w-full flex-col items-start pt-12">
-                  <NavigationMenuList className="flex flex-col items-start space-y-4">
-                    {navLinks.map((link) => (
-                      <NavigationMenuItem key={link.href}>
-                        <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                          <Link href={link.href}>
-                            {link.label}
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    ))}
-                  </NavigationMenuList>
+                <NavigationMenu orientation="vertical" className="flex max-w-full flex-col items-start pt-12">
+                    <NavigationMenuList className="flex flex-col items-start space-y-4">
+                        {navLinks.map((link) => (
+                            <NavigationMenuItem key={link.href}>
+                                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                                    <Link href={link.href}>
+                                        {link.label}
+                                    </Link>
+                                </NavigationMenuLink>
+                            </NavigationMenuItem>
+                        ))}
+                    </NavigationMenuList>
                 </NavigationMenu>
               </SheetContent>
             </Sheet>
