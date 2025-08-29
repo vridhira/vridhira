@@ -1,52 +1,56 @@
 'use server';
 
 import NextAuth from 'next-auth';
-import type { AuthOptions } from 'next-auth';
+import type { AuthOptions, Provider } from 'next-auth/providers';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { findUserByEmail, createUser } from '@/lib/data';
 import { User } from '@/lib/types';
 import bcrypt from 'bcrypt';
 
-if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-  // In a real app, you'd want to throw an error here or handle it more gracefully.
-  // For this prototype, we'll log a warning.
-  console.warn("Google OAuth credentials are not set in environment variables. Google login will not work.");
+const providers: Provider[] = [
+  CredentialsProvider({
+    name: 'Credentials',
+    credentials: {
+      email: { label: "Email", type: "email" },
+      password: { label: "Password", type: "password" }
+    },
+    async authorize(credentials) {
+      if (!credentials?.email || !credentials?.password) {
+        return null;
+      }
+
+      const user = findUserByEmail(credentials.email);
+
+      if (user && user.password && await bcrypt.compare(credentials.password, user.password)) {
+        return { 
+          id: user.id,
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        } as any;
+      } else {
+        return null;
+      }
+    }
+  })
+];
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  providers.push(
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    })
+  );
+} else {
+  console.warn("Google OAuth credentials are not set in environment variables. Google login will not be available.");
 }
 
+
 export const authOptions: AuthOptions = {
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-    CredentialsProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
-
-        const user = findUserByEmail(credentials.email);
-
-        if (user && user.password && await bcrypt.compare(credentials.password, user.password)) {
-          return { 
-            id: user.id,
-            name: `${user.firstName} ${user.lastName}`,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-          } as any;
-        } else {
-          return null;
-        }
-      }
-    })
-  ],
+  providers: providers,
   secret: process.env.NEXTAUTH_SECRET || 'authsecret',
   pages: {
     signIn: '/login',
