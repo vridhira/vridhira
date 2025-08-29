@@ -26,6 +26,12 @@ export default function LoginPage() {
                 <Chrome className="mr-2 h-5 w-5" /> Continue with Google
               </Button>
             </div>
+             <div className="mt-4 text-center text-sm">
+                    Don't have an account?{" "}
+                    <Link href="/signup" className="underline">
+                        Sign up
+                    </Link>
+                </div>
           </CardContent>
         </Card>
         <p className="text-center text-sm text-gray-500">
