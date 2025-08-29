@@ -8,6 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
@@ -26,66 +29,126 @@ export default function AccountPage() {
 
   return (
     <div className="container mx-auto py-12 px-4 md:px-6">
-      <div className="grid gap-10 md:grid-cols-3">
-        <div className="md:col-span-1">
-          <Card>
-            <CardHeader className="flex flex-col items-center text-center">
-              <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage src={user?.image || ''} alt={user?.name || 'User'} />
-                <AvatarFallback>{user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <CardTitle className="text-2xl font-headline">{user?.name}</CardTitle>
-              <CardDescription>Member since {memberSince}</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Button className="w-full" disabled>Edit Profile</Button>
-            </CardContent>
-          </Card>
+      <header className="mb-10">
+        <h1 className="text-4xl font-headline tracking-tight">My Account</h1>
+        <p className="text-muted-foreground mt-2">Manage your account, orders, and settings.</p>
+      </header>
+      <div className="grid gap-10 md:grid-cols-[280px_1fr]">
+        <div className="space-y-6">
+            <Card>
+                <CardHeader className="flex flex-row items-center space-x-4">
+                <Avatar className="h-16 w-16">
+                    <AvatarImage src={user?.image || ''} alt={user?.name || 'User'} />
+                    <AvatarFallback>{user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div>
+                    <CardTitle className="text-xl font-semibold">{user?.name}</CardTitle>
+                    <CardDescription>Member since {memberSince}</CardDescription>
+                </div>
+                </CardHeader>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle>Account Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="space-y-1">
+                        <Label>Email Address</Label>
+                        <p className='text-sm text-muted-foreground'>{user?.email}</p>
+                    </div>
+                     <div className="space-y-1">
+                        <Label>Password</Label>
+                        <Button variant="outline" size="sm" disabled>Change Password</Button>
+                    </div>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle>Account Management</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Button variant="destructive" disabled>Delete Account</Button>
+                </CardContent>
+            </Card>
         </div>
 
-        <div className="md:col-span-2 space-y-8">
-          {/* Account Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Information</CardTitle>
-              <CardDescription>This is your primary account information.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="space-y-2">
-                    <Label>Full Name</Label>
-                    <Input defaultValue={user?.name || ''} disabled />
-                </div>
-                <div className="space-y-2">
-                    <Label>Email Address</Label>
-                    <Input defaultValue={user?.email || ''} disabled />
-                    <p className='text-xs text-muted-foreground'>Your email is used for login and is not editable.</p>
-                </div>
-            </CardContent>
-          </Card>
-          
-          {/* Security Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Security</CardTitle>
-              <CardDescription>Manage your account security settings.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <Button disabled>Change Password</Button>
-                <Button variant="destructive" disabled>Delete Account</Button>
-            </CardContent>
-          </Card>
+        <div className="w-full">
+            <Tabs defaultValue="orders">
+                <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="orders">My Orders</TabsTrigger>
+                    <TabsTrigger value="addresses">Address Book</TabsTrigger>
+                    <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
+                    <TabsTrigger value="reviews">My Reviews</TabsTrigger>
+                </TabsList>
 
-          {/* Buyer-Specific Sections (Placeholders) */}
-          <Card>
-            <CardHeader>
-              <CardTitle>My Orders</CardTitle>
-              <CardDescription>View your order history and track current orders.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <p className="text-sm text-muted-foreground">You have no recent orders.</p>
-            </CardContent>
-          </Card>
+                <TabsContent value="orders" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Order History</CardTitle>
+                            <CardDescription>A list of your past and current orders.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Order ID</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="text-right">Total</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-24 text-center">
+                                        You have no orders.
+                                        </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
 
+                <TabsContent value="addresses" className="mt-6">
+                     <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <div>
+                                <CardTitle>Address Book</CardTitle>
+                                <CardDescription>Manage your saved shipping addresses.</CardDescription>
+                            </div>
+                            <Button disabled>Add New Address</Button>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-muted-foreground text-center py-10">You have no saved addresses.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="wishlist" className="mt-6">
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>My Wishlist</CardTitle>
+                            <CardDescription>Products you have saved for later.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                             <p className="text-sm text-muted-foreground text-center py-10">Your wishlist is empty.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                 <TabsContent value="reviews" className="mt-6">
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>My Reviews</CardTitle>
+                            <CardDescription>Product reviews you have submitted.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-muted-foreground text-center py-10">You have not submitted any reviews.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+            </Tabs>
         </div>
       </div>
     </div>

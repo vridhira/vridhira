@@ -27,6 +27,25 @@ export type Review = {
   date: string;
 };
 
+export type OrderItem = {
+  productId: string;
+  productName: string;
+  productImage: string;
+  quantity: number;
+  price: number;
+}
+
+export type Order = {
+    id: string;
+    userId: string;
+    date: string;
+    status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+    total: number;
+    items: OrderItem[];
+    shippingAddress: string;
+    paymentMethod: string;
+}
+
 export const artisans: Artisan[] = [
   {
     id: 'artisan-1',
@@ -153,3 +172,43 @@ export const categories = [
     { name: 'Woodwork', image: 'https://picsum.photos/400/300?c=4', data_ai_hint: 'wood craft' },
     { name: 'Jewelry', image: 'https://picsum.photos/400/300?c=5', data_ai_hint: 'jewelry handmade' },
 ];
+
+const orders: Order[] = [
+    {
+        id: 'ORD-001',
+        userId: 'mock-user-id', // We'll use a mock ID for now
+        date: '2023-11-20',
+        status: 'Delivered',
+        total: 122.49,
+        items: [
+            { productId: 'prod-1', productName: 'Handwoven Wool Shawl', productImage: 'https://picsum.photos/600/400?p=1', quantity: 1, price: 89.99 },
+            { productId: 'prod-2', productName: 'Terracotta Clay Pot', productImage: 'https://picsum.photos/600/400?p=4', quantity: 1, price: 32.50 },
+        ],
+        shippingAddress: '123 Dharma Lane, Bodhi Town, 110011',
+        paymentMethod: 'Visa **** 4321',
+    },
+    {
+        id: 'ORD-002',
+        userId: 'mock-user-id',
+        date: '2023-12-05',
+        status: 'Shipped',
+        total: 55.00,
+        items: [
+            { productId: 'prod-5', productName: 'Wooden Spice Box', productImage: 'https://picsum.photos/600/400?p=10', quantity: 1, price: 55.00 },
+        ],
+        shippingAddress: '123 Dharma Lane, Bodhi Town, 110011',
+        paymentMethod: 'Mastercard **** 5678',
+    }
+];
+
+// In a real app, this would fetch from a database
+export async function getOrdersByUserId(userId: string): Promise<Order[]> {
+  console.log(`Fetching orders for userId: ${userId}`); // This will help in debugging
+  // For now, we return all mock orders for any user. 
+  // In a real app, you would filter by userId.
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(orders.filter(o => o.userId === 'mock-user-id'));
+    }, 500); // Simulate network delay
+  });
+}
