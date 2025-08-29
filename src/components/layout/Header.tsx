@@ -5,7 +5,7 @@ import { Menu, Search, ShoppingCart, User } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Logo } from "@/components/Logo"
 import {
   NavigationMenu,
@@ -100,15 +100,19 @@ export function Header() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[200px] bg-background/80 backdrop-blur-lg">
+                <SheetHeader>
+                  <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                </SheetHeader>
                 <div className="flex flex-col items-start space-y-4 pt-12">
                   {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="text-lg font-medium text-foreground hover:text-primary transition-colors"
-                    >
-                      {link.label}
-                    </Link>
+                    <NavigationMenuLink asChild key={link.href} className={navigationMenuTriggerStyle()}>
+                       <Link
+                        href={link.href}
+                        className="text-lg font-medium text-foreground hover:text-primary transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </NavigationMenuLink>
                   ))}
                 </div>
               </SheetContent>
