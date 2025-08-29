@@ -10,6 +10,7 @@ import { products as initialProducts } from '@/lib/data';
 import type { Product } from '@/lib/data';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
+import { ShieldCheck, PlusCircle, Trash2 } from 'lucide-react';
 
 function AdminLogin({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState('');
@@ -26,11 +27,12 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Admin Login</CardTitle>
-          <CardDescription>Please enter your credentials to access the dashboard.</CardDescription>
+    <div className="flex items-center justify-center min-h-screen bg-muted/40">
+      <Card className="w-full max-w-sm shadow-2xl">
+        <CardHeader className="text-center">
+          <ShieldCheck className="mx-auto h-12 w-12 text-primary" />
+          <CardTitle className="mt-4 text-2xl font-headline">Admin Access</CardTitle>
+          <CardDescription>Enter your credentials to manage the store.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -41,6 +43,7 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="admin"
+                autoComplete="username"
               />
             </div>
             <div className="space-y-2">
@@ -51,10 +54,11 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="admin"
+                autoComplete="current-password"
               />
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full !mt-6">
               Login
             </Button>
           </form>
@@ -126,76 +130,92 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="container py-12">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
-      <div className="grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Add New Product</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleAddProduct} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Product Name</Label>
-                  <Input id="name" name="name" value={newProduct.name} onChange={handleInputChange} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" name="description" value={newProduct.description} onChange={handleInputChange} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price</Label>
-                  <Input id="price" name="price" type="number" value={newProduct.price} onChange={handleInputChange} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Input id="category" name="category" value={newProduct.category} onChange={handleInputChange} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="image">Product Image</Label>
-                  <Input id="image" type="file" onChange={handleFileChange} accept="image/*" />
-                </div>
-                <Button type="submit" className="w-full">
-                  Add Product
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="md:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Existing Products</CardTitle>
-              <CardDescription>Manage and remove products from your store.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {products.map((product) => (
-                  <div key={product.id} className="flex items-center gap-4 p-4 border rounded-md">
-                    <Image
-                      src={product.images[0]}
-                      alt={product.name}
-                      width={80}
-                      height={80}
-                      className="rounded-md object-cover"
-                    />
-                    <div className="flex-grow">
-                      <h3 className="font-semibold">{product.name}</h3>
-                      <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
-                    </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleRemoveProduct(product.id)}
-                    >
-                      Remove
-                    </Button>
+    <div className="bg-muted/40 min-h-screen">
+      <div className="container py-12">
+        <header className="mb-12 text-center">
+            <h1 className="text-4xl font-bold font-headline tracking-tight">Admin Dashboard</h1>
+            <p className="text-lg text-muted-foreground mt-2">Manage your products and store settings.</p>
+        </header>
+        <div className="grid lg:grid-cols-3 gap-12">
+          <div className="lg:col-span-1">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-2xl">
+                  <PlusCircle className="text-primary" />
+                  Add New Product
+                </CardTitle>
+                <CardDescription>Fill in the details below to add a new item.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleAddProduct} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Product Name</Label>
+                    <Input id="name" name="name" value={newProduct.name} onChange={handleInputChange} />
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea id="description" name="description" value={newProduct.description} onChange={handleInputChange} rows={4} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="price">Price ($)</Label>
+                        <Input id="price" name="price" type="number" value={newProduct.price} onChange={handleInputChange} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="category">Category</Label>
+                        <Input id="category" name="category" value={newProduct.category} onChange={handleInputChange} />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="image">Product Image</Label>
+                    <Input id="image" type="file" onChange={handleFileChange} accept="image/*" className="file:text-primary file:font-semibold" />
+                  </div>
+                  <Button type="submit" className="w-full !mt-6">
+                    Add Product
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="lg:col-span-2">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl">Existing Products</CardTitle>
+                <CardDescription>Manage and remove products from your store.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-4 -mr-4">
+                  {products.length > 0 ? products.map((product) => (
+                    <div key={product.id} className="flex items-center gap-6 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <Image
+                        src={product.images[0]}
+                        alt={product.name}
+                        width={100}
+                        height={100}
+                        className="rounded-md object-cover aspect-square"
+                      />
+                      <div className="flex-grow">
+                        <h3 className="font-semibold text-lg">{product.name}</h3>
+                        <p className="text-sm text-muted-foreground">{product.category}</p>
+                        <p className="text-lg font-bold text-primary mt-1">${product.price.toFixed(2)}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveProduct(product.id)}
+                        className="text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                        <span className="sr-only">Remove</span>
+                      </Button>
+                    </div>
+                  )) : (
+                    <p className="text-center text-muted-foreground py-8">No products yet. Add one to get started!</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
