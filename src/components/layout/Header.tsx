@@ -54,11 +54,11 @@ export function Header() {
             <NavigationMenuList>
               {navLinks.map((link) => (
                 <NavigationMenuItem key={link.href}>
-                  <Link href={link.href} legacyBehavior passHref>
-                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                     <Link href={link.href}>
                       {link.label}
-                    </NavigationMenuLink>
-                  </Link>
+                    </Link>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
               ))}
             </NavigationMenuList>
@@ -105,15 +105,15 @@ export function Header() {
                 <SheetHeader>
                   <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                 </SheetHeader>
-                <NavigationMenu orientation="vertical" className="flex max-w-full flex-col items-start pt-12">
+                 <NavigationMenu orientation="vertical" className="flex max-w-full flex-col items-start pt-12">
                   <NavigationMenuList className="flex flex-col items-start space-y-4">
                     {navLinks.map((link) => (
                       <NavigationMenuItem key={link.href}>
-                        <Link href={link.href} legacyBehavior passHref>
-                          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                          <Link href={link.href}>
                             {link.label}
-                          </NavigationMenuLink>
-                        </Link>
+                          </Link>
+                        </NavigationMenuLink>
                       </NavigationMenuItem>
                     ))}
                   </NavigationMenuList>
