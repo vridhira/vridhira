@@ -53,8 +53,8 @@ export function Header() {
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
               {navLinks.map((link) => (
-                 <NavigationMenuItem key={link.href}>
-                  <Link href={link.href} legacyBehavior passHref>
+                <NavigationMenuItem key={link.href}>
+                  <Link href={link.href} passHref legacyBehavior>
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                       {link.label}
                     </NavigationMenuLink>
