@@ -4,7 +4,7 @@ import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Chrome, Github } from 'lucide-react';
+import { Chrome } from 'lucide-react';
 
 export default function LoginPage() {
   return (
@@ -19,9 +19,6 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3 pt-2">
-              <Button className="w-full h-11 text-sm font-medium" onClick={() => signIn('github')}>
-                <Github className="mr-2 h-5 w-5" /> Continue with GitHub
-              </Button>
               <Button variant="outline" className="w-full h-11 text-sm font-medium" onClick={() => signIn('google')}>
                 <Chrome className="mr-2 h-5 w-5" /> Continue with Google
               </Button>
