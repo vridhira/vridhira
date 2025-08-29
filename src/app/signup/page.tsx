@@ -1,7 +1,9 @@
+'use client';
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
 import { UserPlus } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 export default function SignupPage() {
   return (
@@ -10,21 +12,19 @@ export default function SignupPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Create an Account</CardTitle>
           <CardDescription>
-            Click the button below to create your account and start shopping.
+            Click the button below to sign up with your GitHub account.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button asChild className="w-full">
-             <Link href="/api/auth/login?screen_hint=signup">
-                <UserPlus className="mr-2" /> Sign Up
-            </Link>
+          <Button className="w-full" onClick={() => signIn('github')}>
+            <UserPlus className="mr-2" /> Sign Up with GitHub
           </Button>
         </CardContent>
         <div className="p-6 pt-0 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/api/auth/login" className="underline hover:text-primary">
+            <button onClick={() => signIn('github')} className="underline hover:text-primary">
                 Login
-            </Link>
+            </button>
         </div>
       </Card>
     </div>

@@ -10,63 +10,8 @@ import { products as initialProducts } from '@/lib/data';
 import type { Product } from '@/lib/data';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
-import { ShieldCheck, PlusCircle, Trash2 } from 'lucide-react';
-
-function AdminLogin({ onLogin }: { onLogin: () => void }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (username === 'admin' && password === 'admin') {
-      onLogin();
-    } else {
-      setError('Invalid username or password');
-    }
-  };
-
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/40">
-      <Card className="w-full max-w-sm shadow-2xl">
-        <CardHeader className="text-center">
-          <ShieldCheck className="mx-auto h-12 w-12 text-primary" />
-          <CardTitle className="mt-4 text-2xl font-headline">Admin Access</CardTitle>
-          <CardDescription>Enter your credentials to manage the store.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin"
-                autoComplete="username"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="admin"
-                autoComplete="current-password"
-              />
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full !mt-6">
-              Login
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+import { ShieldCheck, PlusCircle, Trash2, ShieldAlert } from 'lucide-react';
+import { useSession, signIn } from 'next-auth/react';
 
 function AdminDashboard() {
   const { toast } = useToast();
@@ -222,12 +167,32 @@ function AdminDashboard() {
   );
 }
 
-export default function AdminPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+function AccessDenied() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] text-center px-4">
+      <ShieldAlert className="h-16 w-16 text-destructive"/>
+      <h1 className="mt-4 text-4xl font-bold tracking-tight">Access Denied</h1>
+      <p className="mt-2 text-lg text-muted-foreground">
+        You do not have permission to view this page. Please sign in as an admin.
+      </p>
+      <Button onClick={() => signIn('github')} className="mt-6">
+        Sign In
+      </Button>
+    </div>
+  );
+}
 
-  if (!isLoggedIn) {
-    return <AdminLogin onLogin={() => setIsLoggedIn(true)} />;
+export default function AdminPage() {
+  const { data: session, status } = useSession();
+
+  if (status === 'loading') {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  return <AdminDashboard />;
+  // @ts-ignore
+  if (session && session.user.role === 'admin') {
+    return <AdminDashboard />;
+  }
+
+  return <AccessDenied />;
 }

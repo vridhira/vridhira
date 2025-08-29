@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
 import Link from "next/link"
 import { Menu, Search, ShoppingCart, User } from "lucide-react"
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { useSession, signIn } from 'next-auth/react';
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,7 +24,8 @@ const navLinks = [
 ]
 
 export function Header() {
-  const { user, isLoading } = useUser();
+  const { data: session, status } = useSession();
+  const isLoading = status === 'loading';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg">
@@ -72,20 +73,18 @@ export function Header() {
                 <span className="sr-only">Shopping Cart</span>
               </Button>
             </Link>
-            {!isLoading && user ? (
+            {!isLoading && session ? (
               <Link href="/account">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src={user.picture ?? ''} alt={user.name ?? 'User'} />
-                  <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
+                  <AvatarImage src={session.user?.image ?? ''} alt={session.user?.name ?? 'User'} />
+                  <AvatarFallback>{session.user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
               </Link>
             ) : (
-              <Link href="/api/auth/login">
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                  <span className="sr-only">Account</span>
-                </Button>
-              </Link>
+              <Button variant="ghost" size="icon" onClick={() => signIn('github')}>
+                <User className="h-5 w-5" />
+                <span className="sr-only">Account</span>
+              </Button>
             )}
           </nav>
           
@@ -98,20 +97,18 @@ export function Header() {
                   <span className="sr-only">Shopping Cart</span>
                 </Button>
               </Link>
-              {!isLoading && user ? (
+              {!isLoading && session ? (
                 <Link href="/account">
                    <Avatar className="h-9 w-9">
-                    <AvatarImage src={user.picture ?? ''} alt={user.name ?? 'User'} />
-                    <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarImage src={session.user?.image ?? ''} alt={session.user?.name ?? 'User'} />
+                    <AvatarFallback>{session.user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </Link>
               ) : (
-                <Link href="/api/auth/login">
-                  <Button variant="ghost" size="icon">
-                    <User className="h-5 w-5" />
-                    <span className="sr-only">Account</span>
-                  </Button>
-                </Link>
+                <Button variant="ghost" size="icon" onClick={() => signIn('github')}>
+                  <User className="h-5 w-5" />
+                  <span className="sr-only">Account</span>
+                </Button>
               )}
             </nav>
             <Sheet>

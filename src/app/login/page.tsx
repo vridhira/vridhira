@@ -1,7 +1,9 @@
+'use client';
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
 import { LogIn } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   return (
@@ -10,14 +12,12 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Login or Sign Up</CardTitle>
           <CardDescription>
-            Use your preferred method to sign in to your account. We support password, OTP, and social logins.
+            Click the button below to sign in with your GitHub account.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button asChild className="w-full">
-            <Link href="/api/auth/login">
-              <LogIn className="mr-2" /> Continue
-            </Link>
+          <Button className="w-full" onClick={() => signIn('github')}>
+            <LogIn className="mr-2" /> Continue with GitHub
           </Button>
         </CardContent>
       </Card>
