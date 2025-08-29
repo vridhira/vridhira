@@ -4,16 +4,21 @@ import NextAuth from 'next-auth';
 import type { AuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import env from '@/lib/env';
 import { findUserByEmail, createUser } from '@/lib/data';
 import { User } from '@/lib/types';
 import bcrypt from 'bcrypt';
 
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  // In a real app, you'd want to throw an error here or handle it more gracefully.
+  // For this prototype, we'll log a warning.
+  console.warn("Google OAuth credentials are not set in environment variables. Google login will not work.");
+}
+
 export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     CredentialsProvider({
       name: 'Credentials',
@@ -42,7 +47,7 @@ export const authOptions: AuthOptions = {
       }
     })
   ],
-  secret: env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || 'authsecret',
   pages: {
     signIn: '/login',
   },
