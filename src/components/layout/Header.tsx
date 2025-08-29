@@ -40,7 +40,7 @@ export function Header() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder=""
+                  placeholder="Search for products..."
                   className="w-full pl-9 font-headline"
                 />
               </div>
@@ -70,7 +70,7 @@ export function Header() {
                 <span className="sr-only">Shopping Cart</span>
               </Button>
             </Link>
-            <Link href="/login">
+            <Link href="/account">
               <Button variant="ghost" size="icon">
                 <User className="h-5 w-5" />
                 <span className="sr-only">Account</span>
@@ -87,7 +87,7 @@ export function Header() {
                   <span className="sr-only">Shopping Cart</span>
                 </Button>
               </Link>
-              <Link href="/login">
+              <Link href="/account">
                 <Button variant="ghost" size="icon">
                   <User className="h-5 w-5" />
                   <span className="sr-only">Account</span>
@@ -101,7 +101,7 @@ export function Header() {
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[200px] bg-background/80 backdrop-blur-lg">
+              <SheetContent side="right" className="w-[240px] bg-background/95 backdrop-blur-lg">
                 <SheetHeader>
                   <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                 </SheetHeader>
