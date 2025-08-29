@@ -54,9 +54,11 @@ export function Header() {
             <NavigationMenuList>
               {navLinks.map((link) => (
                 <NavigationMenuItem key={link.href}>
-                  <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                    <Link href={link.href}>{link.label}</Link>
-                  </NavigationMenuLink>
+                  <Link href={link.href} legacyBehavior passHref>
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      {link.label}
+                    </NavigationMenuLink>
+                  </Link>
                 </NavigationMenuItem>
               ))}
             </NavigationMenuList>
@@ -103,18 +105,19 @@ export function Header() {
                 <SheetHeader>
                   <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                 </SheetHeader>
-                <div className="flex flex-col items-start space-y-4 pt-12">
-                  {navLinks.map((link) => (
-                    <NavigationMenuLink asChild key={link.href} className={navigationMenuTriggerStyle()}>
-                       <Link
-                        href={link.href}
-                        className="text-lg font-medium text-foreground hover:text-primary transition-colors"
-                      >
-                        {link.label}
-                      </Link>
-                    </NavigationMenuLink>
-                  ))}
-                </div>
+                <NavigationMenu orientation="vertical" className="flex max-w-full flex-col items-start pt-12">
+                  <NavigationMenuList className="flex flex-col items-start space-y-4">
+                    {navLinks.map((link) => (
+                      <NavigationMenuItem key={link.href}>
+                        <Link href={link.href} legacyBehavior passHref>
+                          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                            {link.label}
+                          </NavigationMenuLink>
+                        </Link>
+                      </NavigationMenuItem>
+                    ))}
+                  </NavigationMenuList>
+                </NavigationMenu>
               </SheetContent>
             </Sheet>
           </div>
