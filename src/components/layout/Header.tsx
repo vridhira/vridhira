@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Menu, Search, ShoppingCart, User } from "lucide-react"
-import { useSession, signIn } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,7 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 const navLinks = [
   { href: "/products", label: "Products" },
   { href: "/about", label: "About Us" },
-  { href: "/sell", label: "Become a Seller" },
+  { href: "/sell", label: "Sell" },
 ]
 
 export function Header() {
@@ -81,10 +81,12 @@ export function Header() {
                 </Avatar>
               </Link>
             ) : (
-              <Button variant="ghost" size="icon" onClick={() => signIn('github')}>
-                <User className="h-5 w-5" />
-                <span className="sr-only">Account</span>
-              </Button>
+              <Link href="/login">
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                  <span className="sr-only">Account</span>
+                </Button>
+              </Link>
             )}
           </nav>
           
@@ -105,10 +107,12 @@ export function Header() {
                   </Avatar>
                 </Link>
               ) : (
-                <Button variant="ghost" size="icon" onClick={() => signIn('github')}>
-                  <User className="h-5 w-5" />
-                  <span className="sr-only">Account</span>
-                </Button>
+                <Link href="/login">
+                  <Button variant="ghost" size="icon">
+                    <User className="h-5 w-5" />
+                    <span className="sr-only">Account</span>
+                  </Button>
+                </Link>
               )}
             </nav>
             <Sheet>

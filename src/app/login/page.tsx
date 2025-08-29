@@ -1,26 +1,37 @@
 'use client';
 
+import { signIn } from 'next-auth/react';
+import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { Chrome, Github } from 'lucide-react';
 
 export default function LoginPage() {
   return (
-    <div className="flex items-center justify-center min-h-[60vh] py-12">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Login or Sign Up</CardTitle>
-          <CardDescription>
-            Click the button below to sign in with your GitHub account.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button className="w-full" onClick={() => signIn('github')}>
-            <LogIn className="mr-2" /> Continue with GitHub
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
+        <Card className="shadow-lg">
+          <CardHeader className="text-center">
+            <CardTitle className="font-headline text-3xl tracking-tight">Welcome Back</CardTitle>
+            <CardDescription className="pt-2">
+              Sign in to continue to your VRIDHIRA account.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3 pt-2">
+              <Button className="w-full h-11 text-sm font-medium" onClick={() => signIn('github')}>
+                <Github className="mr-2 h-5 w-5" /> Continue with GitHub
+              </Button>
+              <Button variant="outline" className="w-full h-11 text-sm font-medium" onClick={() => signIn('google')}>
+                <Chrome className="mr-2 h-5 w-5" /> Continue with Google
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        <p className="text-center text-sm text-gray-500">
+          By continuing, you agree to VRIDHIRA's <Link href="/terms" className="font-medium text-primary hover:underline">Terms of Service</Link>.
+        </p>
+      </div>
     </div>
   );
 }
