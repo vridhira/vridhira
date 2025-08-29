@@ -41,7 +41,7 @@ export function Header() {
                 <Input
                   type="search"
                   placeholder="Search for products..."
-                  className="w-full pl-9 font-headline"
+                  className="w-full pl-9"
                 />
               </div>
             </form>
@@ -49,16 +49,16 @@ export function Header() {
         </div>
 
         {/* Right Section: Nav and Actions */}
-        <div className="flex items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-end space-x-2">
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
               {navLinks.map((link) => (
                  <NavigationMenuItem key={link.href}>
-                  <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                     <Link href={link.href}>
+                  <Link href={link.href} legacyBehavior passHref>
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                       {link.label}
-                    </Link>
-                  </NavigationMenuLink>
+                    </NavigationMenuLink>
+                  </Link>
                 </NavigationMenuItem>
               ))}
             </NavigationMenuList>
@@ -105,19 +105,17 @@ export function Header() {
                 <SheetHeader>
                   <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                 </SheetHeader>
-                <NavigationMenu orientation="vertical" className="flex max-w-full flex-col items-start pt-12">
-                    <NavigationMenuList className="flex flex-col items-start space-y-4">
-                        {navLinks.map((link) => (
-                            <NavigationMenuItem key={link.href}>
-                                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                                    <Link href={link.href}>
-                                        {link.label}
-                                    </Link>
-                                </NavigationMenuLink>
-                            </NavigationMenuItem>
-                        ))}
-                    </NavigationMenuList>
-                </NavigationMenu>
+                <div className="flex flex-col items-start space-y-4 pt-12">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="text-lg font-medium text-foreground hover:text-primary transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
               </SheetContent>
             </Sheet>
           </div>
