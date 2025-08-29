@@ -1,34 +1,41 @@
 'use server';
 
 import { NextResponse } from 'next/server';
+import { createUser, findUserByEmail, findUserByPhoneNumber } from '@/lib/data';
+import { User } from '@/lib/types';
+import bcrypt from 'bcrypt';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { email, password, firstName, lastName, phoneNumber } = body;
 
-    // --- DATABASE LOGIC WOULD GO HERE ---
-    // For now, we'll just log the data to the console to simulate user creation.
-    
-    if (email) {
-      console.log("Creating user with email:", { email, firstName, lastName });
-      // Example: await db.user.create({ data: { email, password, firstName, lastName } });
-    } else if (phoneNumber) {
-      console.log("Creating user with phone:", { phoneNumber, firstName, lastName });
-      // Example: await db.user.create({ data: { phoneNumber, firstName, lastName } });
-    } else {
-      return NextResponse.json({ message: 'Either email or phone number is required.' }, { status: 400 });
+    if (!firstName || !lastName) {
+      return NextResponse.json({ message: 'First name and last name are required.' }, { status: 400 });
     }
 
-    // In a real app, you'd also handle password hashing here before saving to the DB.
-
-    console.log("Received user data:", body);
-    // --- END OF DATABASE LOGIC ---
+    if (email && password) {
+      if (findUserByEmail(email)) {
+        return NextResponse.json({ message: 'User with this email already exists.' }, { status: 409 });
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser: Partial<User> = { email, password: hashedPassword, firstName, lastName };
+      createUser(newUser);
+    } else if (phoneNumber) {
+        if (findUserByPhoneNumber(phoneNumber)) {
+            return NextResponse.json({ message: 'User with this phone number already exists.' }, { status: 409 });
+        }
+        const newUser: Partial<User> = { phoneNumber, firstName, lastName };
+        createUser(newUser);
+    } else {
+      return NextResponse.json({ message: 'Either email/password or phone number is required.' }, { status: 400 });
+    }
 
     return NextResponse.json({ message: 'User created successfully!' }, { status: 201 });
 
   } catch (error) {
     console.error("Registration Error:", error);
-    return NextResponse.json({ message: 'An error occurred during registration.' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return NextResponse.json({ message: 'An error occurred during registration.', error: errorMessage }, { status: 500 });
   }
 }
