@@ -16,6 +16,7 @@ import { auth } from '@/lib/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { User } from '@/lib/types';
+import { createUser } from '@/lib/user-actions';
 
 const MAX_RESEND_ATTEMPTS = 5;
 const RESEND_COOLDOWN_HOURS = 24;

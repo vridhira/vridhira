@@ -3,6 +3,6 @@ export interface User {
   firstName: string;
   lastName: string;
   email?: string;
-  password?: string; // This will be the hashed password
   phoneNumber?: string;
+  password?: string; // Added password field
 }
