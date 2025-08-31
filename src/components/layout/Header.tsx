@@ -1,8 +1,7 @@
-'use client'
+'use client';
 
 import Link from "next/link"
 import { Menu, Search, ShoppingCart, User } from "lucide-react"
-import { useSession } from 'next-auth/react';
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,6 +15,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useSession } from "next-auth/react";
 
 const navLinks = [
   { href: "/products", label: "Products" },

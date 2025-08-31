@@ -26,6 +26,8 @@ export default function AccountPage() {
         setOrders(userOrders);
         setIsLoadingOrders(false);
       });
+    } else if (status === 'unauthenticated') {
+      redirect('/login');
     } else if (status !== 'loading') {
         setIsLoadingOrders(false);
     }
@@ -35,16 +37,12 @@ export default function AccountPage() {
     return <div className="flex justify-center items-center min-h-[calc(100vh-10rem)]"><p>Loading...</p></div>;
   }
 
-  if (status === 'unauthenticated') {
-    redirect('/login');
-  }
-
   const user = session?.user;
   const memberSince = user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not available';
 
   const getStatusBadgeVariant = (status: Order['status']) => {
     switch (status) {
-        case 'Delivered': return 'success';
+        case 'Delivered': return 'default';
         case 'Shipped': return 'default';
         case 'Processing': return 'secondary';
         case 'Cancelled': return 'destructive';

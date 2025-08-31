@@ -23,7 +23,7 @@ export default function SellPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/signup');
+      router.push('/login');
     }
   }, [status, router]);
 
