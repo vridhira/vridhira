@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Providers } from './providers';
-import { auth } from 'next-auth';
+import { auth } from '@/auth';
 
 export const metadata: Metadata = {
   title: 'VRIDHIRA - Authentic Indian Handicrafts',
