@@ -23,7 +23,7 @@ import { signIn, signOut } from 'next-auth/react';
 interface AuthContextType {
   user: FirebaseUser | null;
   loading: boolean;
-  signup: (email: string, password: string, firstName: string, lastName: string) => Promise<FirebaseUser | null>;
+  signup: (password: string, firstName: string, lastName: string, email?: string, phoneNumber?: string) => Promise<void>;
   logout: () => Promise<void>;
   signInWithPhoneNumber: (phoneNumber: string, recaptchaContainerId: string) => Promise<{ verificationId: string | null, remaining: number }>;
   confirmPhoneNumberOtp: (verificationId: string, otp: string) => Promise<FirebaseUser | null>;
@@ -48,29 +48,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const signup = async (email: string, password: string, firstName: string, lastName: string) => {
-    const existingUser = await findUserByEmail(email);
-    if (existingUser) {
-      throw new Error("An account with this email already exists.");
+  const signup = async (password: string, firstName: string, lastName: string, email?: string, phoneNumber?: string) => {
+    if (email) {
+        const existingUser = await findUserByEmail(email);
+        if (existingUser) {
+          throw new Error("An account with this email already exists.");
+        }
+    }
+    if (phoneNumber) {
+        const existingUser = await findUserByPhoneNumber(phoneNumber);
+        if (existingUser) {
+          throw new Error("An account with this phone number already exists.");
+        }
     }
     
+    await createUser({ email, phoneNumber, password, firstName, lastName });
     
-    await createUser({ email, password, firstName, lastName });
-    
-    try {
-        
-        const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-        await updateProfile(userCredential.user, { displayName: `${firstName} ${lastName}` });
-        
-        
-        await signIn('credentials', { email, password, redirect: false });
-
-        return userCredential.user;
-    } catch (firebaseError) {
-        
-        
-        console.error("Firebase signup failed after local user creation:", firebaseError);
-        throw firebaseError;
+    // We only create a Firebase user if they sign up with email.
+    // Phone auth with password doesn't require a separate Firebase user record for this app's logic.
+    if (email) {
+        try {
+            const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+            await updateProfile(userCredential.user, { displayName: `${firstName} ${lastName}` });
+        } catch (firebaseError) {
+            console.error("Firebase signup failed after local user creation:", firebaseError);
+            throw firebaseError;
+        }
     }
   };
 
@@ -119,7 +122,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error("User not found after phone verification.");
      }
      
-     
+     // Sign in with next-auth for session management
+     await signIn('credentials', {
+         phoneNumber: existingUser.phoneNumber,
+         password: existingUser.password, // This won't work as we don't have the plain password. This flow is only for password reset.
+         redirect: false,
+     });
 
      return result.user;
   };

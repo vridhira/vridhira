@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -13,12 +14,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import PhoneInput from 'react-phone-number-input/react-hook-form-input';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { Chrome, KeyRound, Phone, Mail } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 import { getOtpAttemptInfo } from '@/lib/otp-actions';
-import { isValidPhoneNumber } from 'react-phone-number-input';
 
 
 const emailSchema = z.object({
@@ -28,23 +28,14 @@ const emailSchema = z.object({
 
 const phoneSchema = z.object({
   phoneNumber: z.string().refine(isValidPhoneNumber, { message: "Invalid phone number." }),
-  otp: z.string().optional(),
+  password: z.string().min(8, { message: "Password must be at least 8 characters." }),
 });
 
 
 export default function LoginPage() {
-  const { signInWithPhoneNumber, confirmPhoneNumberOtp } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
-  const [isOtpSent, setIsOtpSent] = useState(false);
-  const [verificationId, setVerificationId] = useState<string | null>(null);
   
-  // OTP Rate Limiting State
-  const [otpAttemptsRemaining, setOtpAttemptsRemaining] = useState(5);
-  const [isBanned, setIsBanned] = useState(false);
-  const [banExpires, setBanExpires] = useState<number | null>(null);
-  const [isCheckingPhone, setIsCheckingPhone] = useState(false);
-
   const emailForm = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
     defaultValues: { email: "", password: "" },
@@ -52,35 +43,9 @@ export default function LoginPage() {
 
   const phoneForm = useForm<z.infer<typeof phoneSchema>>({
     resolver: zodResolver(phoneSchema),
-    defaultValues: { phoneNumber: "" },
+    defaultValues: { phoneNumber: "", password: "" },
   });
 
-  const phoneNumberValue = phoneForm.watch('phoneNumber');
-
-  useEffect(() => {
-    const checkPhoneStatus = async () => {
-        if (phoneNumberValue && isValidPhoneNumber(phoneNumberValue)) {
-            setIsCheckingPhone(true);
-            try {
-                const { remaining, bannedUntil } = await getOtpAttemptInfo(phoneNumberValue);
-                setOtpAttemptsRemaining(remaining);
-                if (bannedUntil && bannedUntil > Date.now()) {
-                    setIsBanned(true);
-                    setBanExpires(bannedUntil);
-                } else {
-                    setIsBanned(false);
-                    setBanExpires(null);
-                }
-            } catch (error) {
-                console.error("Failed to check phone status", error);
-            } finally {
-                setIsCheckingPhone(false);
-            }
-        }
-    };
-    const debounceTimeout = setTimeout(checkPhoneStatus, 500);
-    return () => clearTimeout(debounceTimeout);
-  }, [phoneNumberValue]);
 
   const onEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
     const result = await signIn('credentials', {
@@ -98,46 +63,17 @@ export default function LoginPage() {
   };
   
   const onPhoneSubmit = async (values: z.infer<typeof phoneSchema>) => {
-    if (isBanned) {
-      toast({ title: "Request blocked", description: "This phone number is temporarily blocked due to too many requests.", variant: "destructive" });
-      return;
-    }
-  
-    if (!isOtpSent) {
-      try {
-        const recaptchaContainerId = 'recaptcha-container';
-        const recaptchaContainer = document.getElementById(recaptchaContainerId);
-        if (recaptchaContainer) {
-            recaptchaContainer.style.display = 'block';
-        }
-        
-        const result = await signInWithPhoneNumber(values.phoneNumber, recaptchaContainerId);
-        
-        if (result && result.verificationId) {
-            setVerificationId(result.verificationId);
-            setOtpAttemptsRemaining(result.remaining);
-            setIsOtpSent(true);
-            toast({ title: "OTP Sent", description: "Please check your phone for the verification code." });
-        }
-      } catch (error: any) {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
-        if (error.bannedUntil) {
-            setIsBanned(true);
-            setBanExpires(error.bannedUntil);
-        }
-      }
+    const result = await signIn('credentials', {
+        redirect: false,
+        phoneNumber: values.phoneNumber,
+        password: values.password,
+    });
+
+    if (result?.error) {
+        toast({ title: "Login Failed", description: result.error, variant: "destructive" });
     } else {
-      if (verificationId && values.otp) {
-        try {
-          await confirmPhoneNumberOtp(verificationId, values.otp);
-          toast({ title: "Login Successful", description: "Welcome back!" });
-          router.push('/account');
-        } catch (error: any) {
-          toast({ title: "Login Failed", description: error.message, variant: "destructive" });
-        }
-      } else {
-         toast({ title: "Error", description: "OTP is required.", variant: "destructive" });
-      }
+        toast({ title: "Login Successful", description: "Welcome back!" });
+        router.push('/account');
     }
   };
 
@@ -148,16 +84,6 @@ export default function LoginPage() {
     }
   };
 
-  const getBanTimeRemaining = () => {
-    if (!banExpires) return '';
-    const minutesRemaining = Math.ceil((banExpires - Date.now()) / (1000 * 60));
-    const hoursRemaining = Math.floor(minutesRemaining / 60);
-    const mins = minutesRemaining % 60;
-    if (hoursRemaining > 0) {
-        return `Please try again in ${hoursRemaining}h ${mins}m.`;
-    }
-    return `Please try again in ${minutesRemaining} minutes.`;
-  };
 
   return (
     <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
@@ -244,47 +170,33 @@ export default function LoginPage() {
                                           placeholder="Enter phone number"
                                           {...field}
                                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                          disabled={isBanned || isCheckingPhone}
                                       />
                                   </FormControl>
                                   <FormMessage />
                               </FormItem>
                           )}
                       />
-                      {isBanned ? (
-                          <div className="space-y-4 text-center">
-                              <p className="text-sm font-medium text-destructive">
-                                  Too many attempts. {getBanTimeRemaining()}
-                              </p>
-                              <Button asChild variant="outline" className="w-full">
-                                  <a href="mailto:support@vridhira.com"><Mail className="mr-2"/>Contact Support</a>
-                              </Button>
-                          </div>
-                      ) : (
-                          <>
-                              {!isOtpSent && otpAttemptsRemaining < 5 && (
-                                  <p className="text-sm text-center text-yellow-600">
-                                      You have {otpAttemptsRemaining} attempts remaining today.
-                                  </p>
-                              )}
-                              {isOtpSent && (
-                              <FormField
-                                  control={phoneForm.control}
-                                  name="otp"
-                                  render={({ field }) => (
-                                      <FormItem>
-                                      <FormLabel>Verification Code (OTP)</FormLabel>
-                                      <FormControl><Input placeholder="123456" {...field} /></FormControl>
-                                      <FormMessage />
-                                      </FormItem>
-                                  )}
-                                  />
-                              )}
-                              <Button type="submit" className="w-full h-11" disabled={phoneForm.formState.isSubmitting || isBanned || isCheckingPhone}>
-                                  <Phone className="mr-2"/>{isOtpSent ? 'Verify & Sign In' : 'Send OTP'}
-                              </Button>
-                          </>
-                      )}
+                      <FormField
+                        control={phoneForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="flex justify-between">
+                              <FormLabel>Password</FormLabel>
+                               <Link href="/forgot-password" passHref>
+                                <span className="text-sm font-medium text-primary hover:underline cursor-pointer">
+                                  Forgot password?
+                                </span>
+                              </Link>
+                            </div>
+                            <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit" className="w-full h-11" disabled={phoneForm.formState.isSubmitting}>
+                          <Phone className="mr-2"/> Sign In with Phone
+                      </Button>
                     </form>
                   </Form>
                 </TabsContent>

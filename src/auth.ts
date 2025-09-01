@@ -2,7 +2,7 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
-import { findUserByEmail, createUser } from '@/lib/user-actions';
+import { findUserByEmail, findUserByPhoneNumber, createUser } from '@/lib/user-actions';
 import bcrypt from 'bcrypt';
 import type { NextAuthConfig } from 'next-auth';
 
@@ -18,26 +18,32 @@ export const authConfig = {
     }),
     Credentials({
       async authorize(credentials) {
-        if (credentials.email && credentials.password) {
-          const email = credentials.email as string;
-          const password = credentials.password as string;
-          const user = await findUserByEmail(email);
+        const { email, phoneNumber, password } = credentials;
 
-          if (!user) {
-            throw new Error("No user found with this email.");
-          }
+        if (!password) {
+          throw new Error("Password is required.");
+        }
 
-          if (user && user.password) {
-            const passwordMatch = await bcrypt.compare(password, user.password);
-            if (passwordMatch) {
-                const { password, ...userWithoutPassword } = user;
-                return userWithoutPassword;
-            } else {
-                 throw new Error("Incorrect password.");
-            }
+        let user;
+        if (email) {
+          user = await findUserByEmail(email as string);
+           if (!user) throw new Error("No user found with this email.");
+        } else if (phoneNumber) {
+          user = await findUserByPhoneNumber(phoneNumber as string);
+           if (!user) throw new Error("No user found with this phone number.");
+        } else {
+            throw new Error("Either email or phone number is required.");
+        }
+
+        if (user && user.password) {
+          const passwordMatch = await bcrypt.compare(password as string, user.password);
+          if (passwordMatch) {
+            const { password, ...userWithoutPassword } = user;
+            return userWithoutPassword;
           }
         }
-        return null;
+        
+        throw new Error("Incorrect password.");
       },
     }),
   ],

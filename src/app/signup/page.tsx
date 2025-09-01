@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -13,13 +14,21 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Chrome, UserPlus } from 'lucide-react';
 import { signIn } from 'next-auth/react';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
+
 
 const signupSchema = z.object({
   firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
   lastName: z.string().min(2, { message: "Last name must be at least 2 characters." }),
-  email: z.string().email({ message: "Invalid email address." }),
+  email: z.string().email({ message: "Invalid email address." }).optional().or(z.literal('')),
+  phoneNumber: z.string().refine((val) => val ? isValidPhoneNumber(val) : true, { message: "Invalid phone number." }).optional(),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
+}).refine(data => !!data.email || !!data.phoneNumber, {
+    message: "Either email or phone number must be provided.",
+    path: ["email"],
 });
+
 
 export default function SignupPage() {
   const { signup } = useAuth();
@@ -32,26 +41,33 @@ export default function SignupPage() {
       firstName: "",
       lastName: "",
       email: "",
+      phoneNumber: "",
       password: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof signupSchema>) => {
     try {
-      await signup(values.email, values.password, values.firstName, values.lastName);
+      await signup(values.password, values.firstName, values.lastName, values.email, values.phoneNumber);
       toast({
         title: "Account Created!",
         description: "You have been successfully signed up. Welcome to VRIDHIRA!",
+      });
+      // Log the user in automatically after signup
+      await signIn('credentials', {
+          email: values.email,
+          phoneNumber: values.phoneNumber,
+          password: values.password,
+          redirect: false,
       });
       router.push('/account');
     } catch (error: any) {
        if (error.message.includes("already exists")) {
             toast({
                 title: "Account Exists",
-                description: "An account with this email already exists. Please log in.",
+                description: error.message,
                 variant: "destructive",
             });
-            router.push('/login');
         } else {
             toast({
                 title: "Signup Failed",
@@ -89,7 +105,7 @@ export default function SignupPage() {
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Or sign up with email</span>
+                  <span className="bg-card px-2 text-muted-foreground">Or sign up with details</span>
                 </div>
               </div>
             </div>
@@ -124,11 +140,30 @@ export default function SignupPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email Address</FormLabel>
+                      <FormLabel>Email Address (Optional)</FormLabel>
                       <FormControl><Input placeholder="you@example.com" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Phone Number (Optional)</FormLabel>
+                            <FormControl>
+                                <PhoneInput
+                                    international
+                                    defaultCountry="US"
+                                    placeholder="Enter phone number"
+                                    {...field}
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
                 />
                 <FormField
                   control={form.control}
