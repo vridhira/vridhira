@@ -10,14 +10,15 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   RecaptchaVerifier,
-  signInWithPhoneNumber,
+  signInWithPhoneNumber as firebaseSignInWithPhoneNumber,
   updateProfile,
   signInWithCredential,
-  EmailAuthProvider,
   PhoneAuthProvider,
 } from 'firebase/auth';
 import { auth as firebaseAuth } from '@/lib/firebase';
 import { createUser, findUserByEmail, findUserByPhoneNumber } from '@/lib/user-actions';
+import { checkAndRecordOtpAttempt } from '@/lib/otp-actions';
+
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -25,7 +26,7 @@ interface AuthContextType {
   signup: (email: string, password: string, firstName: string, lastName: string) => Promise<FirebaseUser | null>;
   logout: () => Promise<void>;
   signInWithGoogle: () => Promise<FirebaseUser | null>;
-  signInWithPhoneNumber: (phoneNumber: string, recaptchaContainerId: string) => Promise<string | null>;
+  signInWithPhoneNumber: (phoneNumber: string, recaptchaContainerId: string) => Promise<{ verificationId: string | null, remaining: number }>;
   confirmPhoneNumberOtp: (verificationId: string, otp: string) => Promise<FirebaseUser | null>;
 }
 
@@ -46,17 +47,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     return () => unsubscribe();
   }, []);
-
-  const syncUserWithFirebase = async (email: string, password?: string) => {
-      try {
-        await signInWithEmailAndPassword(firebaseAuth, email, password || "default-password-for-oauth");
-      } catch (error: any) {
-        if (error.code === 'auth/user-not-found' && password) {
-          await createUserWithEmailAndPassword(firebaseAuth, email, password);
-        }
-      }
-  }
-
 
   const signup = async (email: string, password: string, firstName: string, lastName: string) => {
     const existingUser = await findUserByEmail(email);
@@ -101,17 +91,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithPhoneNumber = async (phoneNumber: string, recaptchaContainerId: string) => {
+    const attemptResult = await checkAndRecordOtpAttempt(phoneNumber);
+
+    if (!attemptResult.success) {
+      throw { message: attemptResult.message, bannedUntil: attemptResult.bannedUntil };
+    }
+
     const existingUser = await findUserByPhoneNumber(phoneNumber);
     if (existingUser) {
-        throw new Error("An account with this phone number already exists.");
+        // This is a sign-in attempt for an existing user.
+        // In a real app you might handle this differently, but for now we proceed.
     }
     const recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, recaptchaContainerId, {
     'size': 'invisible',
     'callback': () => {},
     'expired-callback': () => {}
     });
-    const confirmationResult = await signInWithPhoneNumber(firebaseAuth, phoneNumber, recaptchaVerifier);
-    return confirmationResult.verificationId;
+    const confirmationResult = await firebaseSignInWithPhoneNumber(firebaseAuth, phoneNumber, recaptchaVerifier);
+    
+    return { verificationId: confirmationResult.verificationId, remaining: attemptResult.remaining };
   };
 
   const confirmPhoneNumberOtp = async (verificationId: string, otp: string) => {

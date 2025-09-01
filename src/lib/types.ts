@@ -6,3 +6,10 @@ export interface User {
   phoneNumber?: string;
   password?: string; // Added password field
 }
+
+export interface OtpAttempt {
+    phoneNumber: string;
+    count: number;
+    firstAttemptTimestamp: number;
+    bannedUntil?: number;
+}
