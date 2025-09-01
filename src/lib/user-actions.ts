@@ -1,3 +1,4 @@
+
 'use server';
 
 import fs from 'fs';
@@ -67,7 +68,7 @@ export const createUser = async (userData: Partial<User>): Promise<User> => {
   }
 
   let hashedPassword = userData.password;
-  if (userData.password) {
+  if (userData.password && userData.password.length > 0) {
       hashedPassword = await bcrypt.hash(userData.password, 10);
   }
 

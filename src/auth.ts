@@ -36,17 +36,17 @@ export const authConfig = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async jwt({ token, user, account }) {
+      if (account && user) {
         token.id = user.id;
-        token.name = user.name
+        token.name = user.name;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user && token) {
         session.user.id = token.id as string;
-        session.user.name = token.name;
+        session.user.name = token.name as string;
       }
       return session;
     },
