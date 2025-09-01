@@ -1,7 +1,7 @@
 
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { findUserByEmail, findUserByPhoneNumber, createUser } from '@/lib/user-actions';
+import { findUserByEmail, findUserByPhoneNumber } from '@/lib/user-actions';
 import bcrypt from 'bcrypt';
 import type { NextAuthConfig } from 'next-auth';
 import { User } from './lib/types';
@@ -14,65 +14,57 @@ export const authConfig = {
   providers: [
     Credentials({
       async authorize(credentials) {
-        // For Google Sign-In, we might pass a user object directly.
-        if (credentials.user) {
-           try {
-            const user = JSON.parse(credentials.user as string) as User;
-            // Omit password before returning, even if it's undefined.
-            const { password, ...userWithoutPassword } = user;
-            return userWithoutPassword;
-           } catch (e) {
-             console.error("Invalid user data for social sign in:", e);
-             return null;
-           }
-        }
-
+        // This function handles credential-based login (email/password or phone/password)
+        
         const { email, phoneNumber, password } = credentials;
 
         if (!password) {
-            console.error("Authorize error: Password is required for credential login.");
+            // A password is always required for credential-based login.
             return null;
         }
-        
-        let user: User | undefined | null;
 
+        let user: User | null | undefined;
+        
         try {
+            // Determine whether to find the user by email or phone number
             if (email) {
-              user = await findUserByEmail(email as string);
+                user = await findUserByEmail(email as string);
             } else if (phoneNumber) {
-              user = await findUserByPhoneNumber(phoneNumber as string);
+                user = await findUserByPhoneNumber(phoneNumber as string);
             } else {
-                console.error("Authorize error: Either email or phone number is required.");
+                // If neither email nor phone is provided, we cannot proceed.
                 return null;
             }
-        } catch (error: any) {
-            console.error("Error finding user in authorize function:", error);
-            // This indicates a server-side problem (e.g., can't read file)
-            // It's better to throw an error here so it can be debugged.
-            // Returning null would imply a user-facing error like "user not found".
-            throw new Error("There was a server error during authentication.");
-        }
 
-        // Case 1: User not found
-        if (!user) {
-            return null; 
-        }
-        
-        // Case 2: User exists but signed up via a social provider (no password)
-        if (!user.password) {
+            // Case 1: User does not exist in the database.
+            if (!user) {
+                return null;
+            }
+
+            // Case 2: User exists, but they don't have a password set
+            // (e.g., they might have signed up via a social provider).
+            if (!user.password) {
+                return null;
+            }
+
+            // Case 3: User exists and has a password. Compare the provided password.
+            const passwordsMatch = await bcrypt.compare(password as string, user.password);
+
+            if (passwordsMatch) {
+                // Successful login. Return the user object without the password.
+                const { password, ...userWithoutPassword } = user;
+                return userWithoutPassword;
+            }
+
+            // Case 4: Passwords do not match.
+            return null;
+
+        } catch (error) {
+            // If any unexpected error occurs (e.g., database connection issue),
+            // log it and prevent login.
+            console.error("Error in authorize function:", error);
             return null;
         }
-        
-        // Case 3: User exists, has a password, now compare it
-        const passwordMatch = await bcrypt.compare(password as string, user.password);
-        
-        if (passwordMatch) {
-            const { password, ...userWithoutPassword } = user;
-            return userWithoutPassword; // Success!
-        }
-        
-        // Case 4: Password does not match
-        return null;
       },
     }),
   ],

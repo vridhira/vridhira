@@ -36,6 +36,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -59,42 +60,57 @@ export default function LoginPage() {
 
 
   const onEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
-    const result = await signIn('credentials', {
-        redirect: false,
-        email: values.email,
-        password: values.password,
-    });
+    setIsSubmitting(true);
+    try {
+      const result = await signIn('credentials', {
+          redirect: false,
+          email: values.email,
+          password: values.password,
+      });
 
-    if (result?.error) {
-        toast({ title: "Login Failed", description: "Invalid credentials. Please check your email and password.", variant: "destructive" });
-    } else {
-        toast({ title: "Login Successful", description: "Welcome back!" });
-        router.push('/');
+      if (result?.error) {
+          toast({ title: "Login Failed", description: "Invalid credentials. Please check your email and password.", variant: "destructive" });
+      } else {
+          toast({ title: "Login Successful", description: "Welcome back!" });
+          router.push('/');
+      }
+    } catch (error) {
+        toast({ title: "Login Failed", description: "An unexpected error occurred. Please try again.", variant: "destructive" });
+    } finally {
+        setIsSubmitting(false);
     }
   };
   
   const onPhoneSubmit = async (values: z.infer<typeof phoneSchema>) => {
-    const result = await signIn('credentials', {
-        redirect: false,
-        phoneNumber: values.phoneNumber,
-        password: values.password,
-    });
+    setIsSubmitting(true);
+    try {
+        const result = await signIn('credentials', {
+            redirect: false,
+            phoneNumber: values.phoneNumber,
+            password: values.password,
+        });
 
-    if (result?.error) {
-        toast({ title: "Login Failed", description: "Invalid credentials. Please check your phone number and password.", variant: "destructive" });
-    } else {
-        toast({ title: "Login Successful", description: "Welcome back!" });
-        router.push('/');
+        if (result?.error) {
+            toast({ title: "Login Failed", description: "Invalid credentials. Please check your phone number and password.", variant: "destructive" });
+        } else {
+            toast({ title: "Login Successful", description: "Welcome back!" });
+            router.push('/');
+        }
+    } catch (error) {
+        toast({ title: "Login Failed", description: "An unexpected error occurred. Please try again.", variant: "destructive" });
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setIsSubmitting(true);
     try {
-      // The signIn function from next-auth/react handles the Google flow when called with the provider's id
       await signIn('google', { callbackUrl: '/' });
-      toast({ title: "Login Successful", description: "Welcome back!" });
     } catch (error: any) {
       toast({ title: "Login Failed", description: "Could not sign in with Google. Please try again.", variant: "destructive" });
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -144,7 +160,7 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <Button variant="outline" className="w-full h-11 text-sm font-medium" onClick={handleGoogleSignIn}>
+              <Button variant="outline" className="w-full h-11 text-sm font-medium" onClick={handleGoogleSignIn} disabled={isSubmitting}>
                 <Chrome className="mr-2 h-5 w-5" /> Continue with Google
               </Button>
               <div className="relative">
@@ -194,7 +210,7 @@ export default function LoginPage() {
                           </FormItem>
                         )}
                       />
-                      <Button type="submit" className="w-full h-11" disabled={emailForm.formState.isSubmitting}>
+                      <Button type="submit" className="w-full h-11" disabled={isSubmitting}>
                           <KeyRound className="mr-2"/> Sign In with Email
                       </Button>
                     </form>
@@ -241,7 +257,7 @@ export default function LoginPage() {
                           </FormItem>
                         )}
                       />
-                      <Button type="submit" className="w-full h-11" disabled={phoneForm.formState.isSubmitting}>
+                      <Button type="submit" className="w-full h-11" disabled={isSubmitting}>
                           <Phone className="mr-2"/> Sign In with Phone
                       </Button>
                     </form>
