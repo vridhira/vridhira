@@ -33,7 +33,7 @@ const phoneSchema = z.object({
 
 
 export default function LoginPage() {
-  const { signInWithGoogle, signInWithPhoneNumber, confirmPhoneNumberOtp } = useAuth();
+  const { signInWithPhoneNumber, confirmPhoneNumberOtp } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -142,12 +142,9 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-      toast({ title: "Login Successful", description: "Welcome back!" });
-      router.push('/account');
-    } catch (error: any) {
-      toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+    const result = await signIn('google', { callbackUrl: '/account' });
+     if (result?.error) {
+      toast({ title: "Login Failed", description: "Could not sign in with Google. Please try again.", variant: "destructive" });
     }
   };
 

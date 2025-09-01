@@ -1,7 +1,8 @@
 
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { findUserByEmail } from '@/lib/user-actions';
+import Google from 'next-auth/providers/google';
+import { findUserByEmail, createUser } from '@/lib/user-actions';
 import bcrypt from 'bcrypt';
 import type { NextAuthConfig } from 'next-auth';
 
@@ -10,6 +11,10 @@ export const authConfig = {
     signIn: '/login',
   },
   providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     Credentials({
       async authorize(credentials) {
         if (credentials.email && credentials.password) {
@@ -36,6 +41,28 @@ export const authConfig = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === 'google') {
+        const email = user.email;
+        if (!email) return false; // Abort sign-in if no email
+
+        let existingUser = await findUserByEmail(email);
+        if (!existingUser) {
+          // Create user in our backend if they don't exist
+          const nameParts = user.name?.split(' ') ?? [''];
+          const firstName = nameParts[0];
+          const lastName = nameParts.slice(1).join(' ') || 'User';
+          
+          await createUser({
+            id: user.id,
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+          });
+        }
+      }
+      return true; // Continue with the sign-in process
+    },
     async jwt({ token, user, account }) {
       if (account && user) {
         token.id = user.id;

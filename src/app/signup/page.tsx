@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Chrome, UserPlus } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 
 const signupSchema = z.object({
   firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
@@ -21,7 +22,7 @@ const signupSchema = z.object({
 });
 
 export default function SignupPage() {
-  const { signup, signInWithGoogle } = useAuth();
+  const { signup } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -62,12 +63,9 @@ export default function SignupPage() {
   };
 
   const handleGoogleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-      toast({ title: "Login Successful", description: "Welcome back!" });
-      router.push('/account');
-    } catch (error: any) {
-      toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+    const result = await signIn('google', { callbackUrl: '/account' });
+    if (result?.error) {
+      toast({ title: "Login Failed", description: "Could not sign in with Google. Please try again.", variant: "destructive" });
     }
   };
 
