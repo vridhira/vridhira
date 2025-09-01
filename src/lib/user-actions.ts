@@ -48,26 +48,34 @@ export const findUserByPhoneNumber = async (phoneNumber: string): Promise<User |
     return users.find((user) => user.phoneNumber === phoneNumber);
 }
 
-export const createUser = async (userData: Omit<User, 'id'>): Promise<User> => {
-  
-  if (!userData.email || !userData.phoneNumber) {
-    throw new Error('Email and phone number are required.');
-  }
+export const createUser = async (userData: Partial<User>): Promise<User> => {
 
   const users = readUsers();
   
-  const existingByEmail = users.find(u => u.email === userData.email);
-  if(existingByEmail) {
-      throw new Error('User with this email already exists.');
+  if (userData.email) {
+    const existingByEmail = users.find(u => u.email === userData.email);
+    if(existingByEmail) {
+        throw new Error('User with this email already exists.');
+    }
   }
 
-  const existingByPhone = users.find(u => u.phoneNumber === userData.phoneNumber);
-  if(existingByPhone) {
-      throw new Error('User with this phone number already exists.');
+  if (userData.phoneNumber) {
+    const existingByPhone = users.find(u => u.phoneNumber === userData.phoneNumber);
+    if(existingByPhone) {
+        throw new Error('User with this phone number already exists.');
+    }
   }
-
+  
   if (!userData.firstName || !userData.lastName) {
-    throw new Error('First name and last name are required to create a user.');
+    // For social sign-ins, we might not have these immediately.
+    // We can derive them from `name` if available.
+    if (userData.name) {
+      const nameParts = userData.name.split(' ');
+      userData.firstName = nameParts[0];
+      userData.lastName = nameParts.slice(1).join(' ') || nameParts[0]; // Handle single names
+    } else {
+      throw new Error('First name and last name are required.');
+    }
   }
 
   let hashedPassword = userData.password;
@@ -76,10 +84,16 @@ export const createUser = async (userData: Omit<User, 'id'>): Promise<User> => {
   }
 
   const newUser: User = {
-    id: Date.now().toString(),
-    ...userData,
+    id: userData.id || Date.now().toString(),
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    email: userData.email,
+    phoneNumber: userData.phoneNumber,
     password: hashedPassword,
+    image: userData.image,
+    createdAt: new Date().toISOString(),
   };
+
   users.push(newUser);
   writeUsers(users);
   
@@ -106,9 +120,26 @@ export const deleteUser = async (userId: string): Promise<{ success: boolean }> 
     const filteredUsers = users.filter(u => u.id !== userId);
 
     if (users.length === filteredUsers.length) {
-        throw new Error("User not found.");
+        // This prevents crashing if a user tries to delete an already deleted account.
+        console.warn(`Attempted to delete non-existent user with ID: ${userId}`);
+        return { success: true }; 
     }
 
     writeUsers(filteredUsers);
     return { success: true };
+}
+
+export const findOrCreateUser = async (profile: Partial<User>): Promise<User> => {
+  if (!profile.email) {
+    throw new Error('Email is required for social sign-in.');
+  }
+
+  const existingUser = await findUserByEmail(profile.email);
+  if (existingUser) {
+    const { password, ...userWithoutPassword } = existingUser;
+    return userWithoutPassword;
+  }
+  
+  // User does not exist, create a new one.
+  return await createUser(profile);
 }

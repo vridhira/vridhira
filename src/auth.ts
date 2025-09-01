@@ -1,7 +1,8 @@
 
 import NextAuth, { AuthError } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { findUserByEmail, findUserByPhoneNumber } from '@/lib/user-actions';
+import Google from 'next-auth/providers/google';
+import { findUserByEmail, findUserByPhoneNumber, findOrCreateUser } from '@/lib/user-actions';
 import bcrypt from 'bcrypt';
 import type { NextAuthConfig } from 'next-auth';
 import { User } from './lib/types';
@@ -21,9 +22,14 @@ class MissingPasswordError extends AuthError {
 export const authConfig = {
   pages: {
     signIn: '/login',
+    error: '/login', // Redirect to login page on error
   },
   secret: process.env.AUTH_SECRET,
   providers: [
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
     Credentials({
       async authorize(credentials) {
         const { email, phoneNumber, password } = credentials;
@@ -41,7 +47,6 @@ export const authConfig = {
             } else if (phoneNumber) {
                 user = await findUserByPhoneNumber(phoneNumber as string);
             } else {
-                // If neither email nor phone is provided, we cannot proceed.
                 return null;
             }
 
@@ -55,16 +60,16 @@ export const authConfig = {
 
             const passwordsMatch = await bcrypt.compare(password as string, user.password);
 
-            if (passwordsMatch) {
-                const { password, ...userWithoutPassword } = user;
-                return userWithoutPassword;
-            } else {
+            if (!passwordsMatch) {
                 throw new InvalidPasswordError("The provided password did not match.");
             }
+            
+            const { password: _, ...userWithoutPassword } = user;
+            return userWithoutPassword;
 
         } catch (error) {
-            // Re-throw custom auth errors so NextAuth can handle them
             if (error instanceof UserNotFoundError || error instanceof InvalidPasswordError || error instanceof MissingPasswordError) {
+                // Re-throw custom auth errors so NextAuth can handle them
                 throw error;
             }
             // Log unexpected errors and throw a generic one
@@ -75,20 +80,39 @@ export const authConfig = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+     async signIn({ user, account, profile }) {
+      if (account?.provider === "google" && profile) {
+        try {
+           const userToCreate = {
+              id: profile.sub, // Google's unique ID
+              email: profile.email,
+              name: profile.name,
+              image: profile.picture,
+           };
+           await findOrCreateUser(userToCreate);
+        } catch (error) {
+           console.error("Error creating user from Google profile:", error);
+           return false; // Prevent sign-in if user creation fails
+        }
+      }
+      return true; // Allow sign-in
+    },
+    async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id;
-        // Attempt to find the full user details to populate the token
-        // This is useful for when Google sign in happens, where the initial `user` object might be partial
+        // This is the initial sign-in
         const dbUser = await findUserByEmail(user.email as string);
         if (dbUser) {
+           token.id = dbUser.id;
            token.name = `${dbUser.firstName} ${dbUser.lastName}`;
            token.email = dbUser.email;
-           token.image = user.image || dbUser.image;
+           token.image = dbUser.image || user.image;
+           token.createdAt = dbUser.createdAt;
         } else {
-           token.name = user.name
-           token.email = user.email
-           token.image = user.image
+           // Fallback for initial user object from provider if db lookup fails
+           token.id = user.id;
+           token.name = user.name;
+           token.email = user.email;
+           token.image = user.image;
         }
       }
       return token;
@@ -99,6 +123,8 @@ export const authConfig = {
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.image = token.image as string | undefined;
+        // @ts-ignore
+        session.user.createdAt = token.createdAt;
       }
       return session;
     },
