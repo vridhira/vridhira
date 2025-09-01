@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -14,6 +15,7 @@ import {
   updateProfile,
   signInWithCredential,
   PhoneAuthProvider,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth as firebaseAuth } from '@/lib/firebase';
 import { createUser, findUserByEmail, findUserByPhoneNumber } from '@/lib/user-actions';
@@ -28,6 +30,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<FirebaseUser | null>;
   signInWithPhoneNumber: (phoneNumber: string, recaptchaContainerId: string) => Promise<{ verificationId: string | null, remaining: number }>;
   confirmPhoneNumberOtp: (verificationId: string, otp: string) => Promise<FirebaseUser | null>;
+  sendPasswordResetEmail: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -98,9 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const existingUser = await findUserByPhoneNumber(phoneNumber);
-    if (existingUser) {
-        // This is a sign-in attempt for an existing user.
-        // In a real app you might handle this differently, but for now we proceed.
+    if (!existingUser) {
+        // This could be a sign-up attempt. Let's allow sending OTP
+        // but the account will be created upon successful OTP verification.
     }
     const recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, recaptchaContainerId, {
     'size': 'invisible',
@@ -135,6 +138,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      return result.user;
   };
 
+  const sendPasswordResetEmail = async (email: string) => {
+    try {
+      await firebaseSendPasswordResetEmail(firebaseAuth, email);
+    } catch (error: any) {
+      console.error("Error sending password reset email:", error);
+      throw new Error(error.message);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -144,6 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInWithGoogle,
       signInWithPhoneNumber,
       confirmPhoneNumberOtp,
+      sendPasswordResetEmail,
     }}>
       {children}
     </AuthContext.Provider>
