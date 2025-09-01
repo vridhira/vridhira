@@ -44,11 +44,11 @@ export const authConfig = {
     async signIn({ user, account }) {
       if (account?.provider === 'google') {
         const email = user.email;
-        if (!email) return false; // Abort sign-in if no email
+        if (!email) return false; 
 
         let existingUser = await findUserByEmail(email);
         if (!existingUser) {
-          // Create user in our backend if they don't exist
+          
           const nameParts = user.name?.split(' ') ?? [''];
           const firstName = nameParts[0];
           const lastName = nameParts.slice(1).join(' ') || 'User';
@@ -61,19 +61,23 @@ export const authConfig = {
           });
         }
       }
-      return true; // Continue with the sign-in process
+      return true; 
     },
-    async jwt({ token, user, account }) {
-      if (account && user) {
+    async jwt({ token, user }) {
+      if (user) {
         token.id = user.id;
         token.name = user.name;
+        token.email = user.email;
+        token.image = user.image;
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user && token) {
+      if (session.user) {
         session.user.id = token.id as string;
-        session.user.name = token.name as string;
+        session.user.name = token.name;
+        session.user.email = token.email;
+        session.user.image = token.image as string | undefined;
       }
       return session;
     },

@@ -54,21 +54,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error("An account with this email already exists.");
     }
     
-    // Create user in our local store first
+    
     await createUser({ email, password, firstName, lastName });
     
     try {
-        // Then create user in Firebase Auth
+        
         const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
         await updateProfile(userCredential.user, { displayName: `${firstName} ${lastName}` });
         
-        // Sign in with NextAuth
+        
         await signIn('credentials', { email, password, redirect: false });
 
         return userCredential.user;
     } catch (firebaseError) {
-        // If Firebase signup fails, we should ideally roll back the user creation in our store.
-        // This is complex with a file-based system, but in a DB you'd use a transaction.
+        
+        
         console.error("Firebase signup failed after local user creation:", firebaseError);
         throw firebaseError;
     }
@@ -119,9 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error("User not found after phone verification.");
      }
      
-     // Here you might want to sign in with NextAuth using a custom credentials provider for phone
-     // For now, Firebase state is managed, and we assume a redirect or UI change will happen
-     // based on the successful Firebase login.
+     
 
      return result.user;
   };
