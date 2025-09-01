@@ -2,7 +2,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -16,9 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { Chrome, KeyRound, Phone, Mail } from 'lucide-react';
+import { Chrome, KeyRound, Phone } from 'lucide-react';
 import { signIn } from 'next-auth/react';
-import { getOtpAttemptInfo } from '@/lib/otp-actions';
 
 
 const emailSchema = z.object({
@@ -34,6 +32,7 @@ const phoneSchema = z.object({
 
 export default function LoginPage() {
   const { toast } = useToast();
+  const { signInWithGoogle } = useAuth();
   const router = useRouter();
   
   const emailForm = useForm<z.infer<typeof emailSchema>>({
@@ -78,8 +77,11 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = async () => {
-    const result = await signIn('google', { callbackUrl: '/account' });
-     if (result?.error) {
+    try {
+      await signInWithGoogle();
+      toast({ title: "Login Successful", description: "Welcome back!" });
+      router.push('/account');
+    } catch (error: any) {
       toast({ title: "Login Failed", description: "Could not sign in with Google. Please try again.", variant: "destructive" });
     }
   };

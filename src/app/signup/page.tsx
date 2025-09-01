@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -28,9 +29,14 @@ const signupSchema = z.object({
 
 
 export default function SignupPage() {
-  const { signup } = useAuth();
+  const { signup, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -53,7 +59,6 @@ export default function SignupPage() {
       // Log the user in automatically after signup
       await signIn('credentials', {
           email: values.email,
-          phoneNumber: values.phoneNumber,
           password: values.password,
           redirect: false,
       });
@@ -76,9 +81,12 @@ export default function SignupPage() {
   };
 
   const handleGoogleSignIn = async () => {
-    const result = await signIn('google', { callbackUrl: '/account' });
-    if (result?.error) {
-      toast({ title: "Login Failed", description: "Could not sign in with Google. Please try again.", variant: "destructive" });
+    try {
+      await signInWithGoogle();
+      toast({ title: "Sign Up Successful", description: "Welcome to VRIDHIRA!" });
+      router.push('/account');
+    } catch (error: any) {
+      toast({ title: "Sign Up Failed", description: "Could not sign in with Google. Please try again.", variant: "destructive" });
     }
   };
 
@@ -143,7 +151,7 @@ export default function SignupPage() {
                     </FormItem>
                   )}
                 />
-                 <FormField
+                {isClient && <FormField
                     control={form.control}
                     name="phoneNumber"
                     render={({ field }) => (
@@ -161,7 +169,7 @@ export default function SignupPage() {
                             <FormMessage />
                         </FormItem>
                     )}
-                />
+                />}
                 <FormField
                   control={form.control}
                   name="password"

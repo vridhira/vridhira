@@ -13,6 +13,8 @@ import {
   signInWithCredential,
   PhoneAuthProvider,
   sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth';
 import { auth as firebaseAuth } from '@/lib/firebase';
 import { createUser, findUserByEmail, findUserByPhoneNumber } from '@/lib/user-actions';
@@ -28,6 +30,7 @@ interface AuthContextType {
   signInWithPhoneNumber: (phoneNumber: string, recaptchaContainerId: string) => Promise<{ verificationId: string | null, remaining: number }>;
   confirmPhoneNumberOtp: (verificationId: string, otp: string) => Promise<FirebaseUser | null>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -115,13 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error("User not found after phone verification.");
      }
      
-     // Sign in with next-auth for session management
-     await signIn('credentials', {
-         phoneNumber: existingUser.phoneNumber,
-         password: existingUser.password, // This won't work as we don't have the plain password. This flow is only for password reset.
-         redirect: false,
-     });
-
+     // This flow is only for password reset. Actual login happens on the login page.
      return result.user;
   };
 
@@ -134,6 +131,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(firebaseAuth, provider);
+      const googleUser = result.user;
+      if (!googleUser.email) {
+        throw new Error("Could not retrieve email from Google.");
+      }
+
+      let dbUser = await findUserByEmail(googleUser.email);
+
+      if (!dbUser) {
+        const nameParts = googleUser.displayName?.split(' ') ?? [''];
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ') || 'User';
+
+        // A placeholder is needed as phone is required, but not provided by Google.
+        // In a real app, you might redirect to a page to complete the profile.
+        const placeholderPhoneNumber = `+${Date.now()}`;
+
+        dbUser = await createUser({
+          id: googleUser.uid,
+          email: googleUser.email,
+          firstName,
+          lastName,
+          phoneNumber: placeholderPhoneNumber, // Or handle this differently
+        });
+      }
+
+      // Now, sign in to next-auth to create a session
+      const nextAuthResult = await signIn('credentials', {
+        redirect: false,
+        user: JSON.stringify(dbUser), // Pass the user object to the authorize function
+      });
+
+      if (nextAuthResult?.error) {
+        throw new Error(nextAuthResult.error);
+      }
+
+    } catch (error: any) {
+      console.error("Google Sign-In failed:", error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -143,6 +185,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInWithPhoneNumber,
       confirmPhoneNumberOtp,
       sendPasswordResetEmail,
+      signInWithGoogle,
     }}>
       {children}
     </AuthContext.Provider>
