@@ -3,7 +3,6 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { findUserByEmail } from '@/lib/user-actions';
 import bcrypt from 'bcrypt';
-import type { User } from '@/lib/types';
 import type { NextAuthConfig } from 'next-auth';
 
 export const authConfig = {
@@ -18,12 +17,17 @@ export const authConfig = {
           const password = credentials.password as string;
           const user = await findUserByEmail(email);
 
+          if (!user) {
+            throw new Error("No user found with this email.");
+          }
+
           if (user && user.password) {
             const passwordMatch = await bcrypt.compare(password, user.password);
             if (passwordMatch) {
-                // Return a user object that is serializable
                 const { password, ...userWithoutPassword } = user;
                 return userWithoutPassword;
+            } else {
+                 throw new Error("Incorrect password.");
             }
           }
         }
@@ -35,7 +39,7 @@ export const authConfig = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.name = `${user.firstName} ${user.lastName}`;
+        token.name = user.name
       }
       return token;
     },

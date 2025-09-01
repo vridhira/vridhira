@@ -2,6 +2,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import bcrypt from 'bcrypt';
 import { User } from './types';
 
 // --- DEVELOPMENT ONLY --- //
@@ -33,6 +34,7 @@ const writeUsers = (users: User[]) => {
 };
 
 export const findUserByEmail = async (email: string): Promise<User | undefined> => {
+  if (!email) return undefined;
   const users = readUsers();
   return users.find((user) => user.email === email);
 };
@@ -44,16 +46,33 @@ export const findUserByPhoneNumber = async (phoneNumber: string): Promise<User |
 
 export const createUser = async (userData: Partial<User>): Promise<User> => {
   const users = readUsers();
-  if (!userData.firstName || !userData.lastName) {
-    throw new Error('First name and last name are required to create a user.');
+  if (!userData.email || !userData.firstName || !userData.lastName) {
+    throw new Error('First name, last name and email are required to create a user.');
   }
+
+  if(userData.email) {
+      const existing = await findUserByEmail(userData.email);
+      if(existing) {
+          throw new Error('User with this email already exists.');
+      }
+  }
+
+  let hashedPassword = userData.password;
+  if (userData.password) {
+      hashedPassword = await bcrypt.hash(userData.password, 10);
+  }
+
   const newUser: User = {
-    id: Date.now().toString(),
+    id: userData.id || Date.now().toString(),
     ...userData,
+    email: userData.email,
     firstName: userData.firstName,
-    lastName: userData.lastName
+    lastName: userData.lastName,
+    password: hashedPassword
   };
   users.push(newUser);
   writeUsers(users);
-  return newUser;
+  
+  const { password, ...userWithoutPassword } = newUser;
+  return userWithoutPassword;
 };

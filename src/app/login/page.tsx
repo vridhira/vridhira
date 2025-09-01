@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation';
 import PhoneInput from 'react-phone-number-input/react-hook-form-input';
 import 'react-phone-number-input/style.css';
 import { Chrome, KeyRound, Phone } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 
 const emailSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -29,7 +30,7 @@ const phoneSchema = z.object({
 
 
 export default function LoginPage() {
-  const { login, signInWithGoogle, signInWithPhoneNumber, confirmPhoneNumberOtp } = useAuth();
+  const { signInWithGoogle, signInWithPhoneNumber, confirmPhoneNumberOtp } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -46,12 +47,17 @@ export default function LoginPage() {
   });
 
   const onEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
-    try {
-      await login(values.email, values.password);
-      toast({ title: "Login Successful", description: "Welcome back!" });
-      router.push('/account');
-    } catch (error: any) {
-      toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+    const result = await signIn('credentials', {
+        redirect: false,
+        email: values.email,
+        password: values.password,
+    });
+
+    if (result?.error) {
+        toast({ title: "Login Failed", description: result.error, variant: "destructive" });
+    } else {
+        toast({ title: "Login Successful", description: "Welcome back!" });
+        router.push('/account');
     }
   };
   
