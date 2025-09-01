@@ -10,6 +10,7 @@ export const authConfig = {
   pages: {
     signIn: '/login',
   },
+  secret: process.env.AUTH_SECRET,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
