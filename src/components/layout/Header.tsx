@@ -1,8 +1,9 @@
+
 'use client';
 
 import Link from "next/link"
 import { Menu, Search, ShoppingCart, User } from "lucide-react"
-
+import { useCart } from "@/context/CartContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/navigation-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useSession } from "next-auth/react";
+import { Badge } from "../ui/badge";
 
 const navLinks = [
   { href: "/products", label: "Products" },
@@ -25,6 +27,7 @@ const navLinks = [
 
 export function Header() {
   const { data: session, status } = useSession();
+  const { cartCount } = useCart();
   const isLoading = status === 'loading';
 
   return (
@@ -68,7 +71,8 @@ export function Header() {
           </NavigationMenu>
           <nav className="hidden md:flex items-center space-x-1">
             <Link href="/cart">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="relative">
+                {cartCount > 0 && <Badge className="absolute -right-2 -top-2 h-5 w-5 justify-center p-0">{cartCount}</Badge>}
                 <ShoppingCart className="h-5 w-5" />
                 <span className="sr-only">Shopping Cart</span>
               </Button>
@@ -94,7 +98,8 @@ export function Header() {
           <div className="flex items-center md:hidden">
             <nav className="flex items-center">
               <Link href="/cart">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="relative">
+                   {cartCount > 0 && <Badge className="absolute -right-2 -top-2 h-5 w-5 justify-center p-0">{cartCount}</Badge>}
                   <ShoppingCart className="h-5 w-5" />
                   <span className="sr-only">Shopping Cart</span>
                 </Button>

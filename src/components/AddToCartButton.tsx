@@ -4,12 +4,14 @@ import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { ShoppingCart } from "lucide-react"
 import type { Product } from "@/lib/data"
+import { useCart } from "@/context/CartContext"
 
 export function AddToCartButton({ product }: { product: Product }) {
   const { toast } = useToast()
+  const { addToCart } = useCart();
 
   const handleAddToCart = () => {
-    // Here you would typically add the product to a cart state
+    addToCart(product);
     toast({
       title: "Added to Cart!",
       description: `${product.name} has been added to your shopping cart.`,

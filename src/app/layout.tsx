@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Providers } from './providers';
 import { auth } from '@/auth';
 import { AuthProvider } from '@/context/AuthContext';
+import { CartProvider } from '@/context/CartContext';
 
 export const metadata: Metadata = {
   title: 'VRIDHIRA - Authentic Indian Handicrafts',
@@ -28,12 +29,14 @@ export default async function RootLayout({
       <body className="font-body antialiased bg-background">
         <Providers session={session}>
           <AuthProvider>
-            <div className="flex flex-col min-h-screen">
-              <Header />
-              <main className="flex-grow">{children}</main>
-              <Footer />
-            </div>
-            <Toaster />
+            <CartProvider>
+              <div className="flex flex-col min-h-screen">
+                <Header />
+                <main className="flex-grow">{children}</main>
+                <Footer />
+              </div>
+              <Toaster />
+            </CartProvider>
           </AuthProvider>
         </Providers>
       </body>

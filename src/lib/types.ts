@@ -1,3 +1,5 @@
+import { Product } from "./data";
+
 export interface User {
   id: string;
   firstName: string;
@@ -12,4 +14,8 @@ export interface OtpAttempt {
     count: number;
     firstAttemptTimestamp: number;
     bannedUntil?: number;
+}
+
+export interface CartItem extends Product {
+  quantity: number;
 }
