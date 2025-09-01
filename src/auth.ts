@@ -22,14 +22,18 @@ export const authConfig = {
             const { password, ...userWithoutPassword } = user;
             return userWithoutPassword;
            } catch (e) {
-             throw new Error("Invalid user data for social sign in.");
+             // If parsing fails, it's an invalid request.
+             console.error("Invalid user data for social sign in:", e);
+             return null;
            }
         }
 
         const { email, phoneNumber, password } = credentials;
 
         if (!password) {
-          throw new Error("Password is required for this login method.");
+            // This should not happen with the current forms, but it's a good safeguard.
+            console.error("Authorize error: Password is required.");
+            return null;
         }
         
         let user: User | undefined | null;
@@ -40,35 +44,40 @@ export const authConfig = {
             } else if (phoneNumber) {
               user = await findUserByPhoneNumber(phoneNumber as string);
             } else {
-                throw new Error("Either email or phone number is required.");
+                // This case should not be reached if the form is submitted correctly
+                console.error("Authorize error: Either email or phone number is required.");
+                return null;
             }
         } catch (error: any) {
-             // Log the server-side error
-            console.error("Error finding user:", error);
-            // Throw a generic error to the client
-            throw new Error("An internal server error occurred.");
+            // This catches errors from the file system (readUsers)
+            console.error("Error finding user in authorize function:", error);
+            // We return null to tell NextAuth it's a server error without crashing.
+            // NextAuth will show a generic error message.
+            return null;
         }
 
         if (!user) {
-            // User not found, throw a specific error for next-auth to catch.
-            throw new Error("No user found with the provided credentials.");
+            // User not found. This is a valid failure case.
+            // Returning null will result in a "CredentialsSignin" error on the client.
+            // We can map this to a user-friendly message on the login page.
+            return null; 
         }
         
         if (!user.password) {
             // This case handles users who signed up via a social provider
             // and are trying to log in with credentials.
-            throw new Error("This account does not have a password set. Please use a social login provider.");
+            return null;
         }
         
         const passwordMatch = await bcrypt.compare(password as string, user.password);
         
         if (passwordMatch) {
             const { password, ...userWithoutPassword } = user;
-            return userWithoutPassword;
+            return userWithoutPassword; // Success!
         }
         
-        // Incorrect password, throw specific error.
-        throw new Error("Invalid password.");
+        // Incorrect password. This is a valid failure case.
+        return null;
       },
     }),
   ],
