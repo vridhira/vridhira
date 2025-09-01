@@ -4,9 +4,9 @@ export interface User {
   id: string;
   firstName: string;
   lastName: string;
-  email?: string;
-  phoneNumber?: string;
-  password?: string; // Added password field
+  email: string;
+  phoneNumber: string;
+  password?: string; // Can be optional for Google Sign-In
 }
 
 export interface OtpAttempt {

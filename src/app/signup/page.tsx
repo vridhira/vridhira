@@ -21,12 +21,9 @@ import 'react-phone-number-input/style.css';
 const signupSchema = z.object({
   firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
   lastName: z.string().min(2, { message: "Last name must be at least 2 characters." }),
-  email: z.string().email({ message: "Invalid email address." }).optional().or(z.literal('')),
-  phoneNumber: z.string().refine((val) => val ? isValidPhoneNumber(val) : true, { message: "Invalid phone number." }).optional(),
+  email: z.string().email({ message: "Invalid email address." }),
+  phoneNumber: z.string().refine(isValidPhoneNumber, { message: "Invalid phone number." }),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
-}).refine(data => !!data.email || !!data.phoneNumber, {
-    message: "Either email or phone number must be provided.",
-    path: ["email"],
 });
 
 
@@ -140,7 +137,7 @@ export default function SignupPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email Address (Optional)</FormLabel>
+                      <FormLabel>Email Address</FormLabel>
                       <FormControl><Input placeholder="you@example.com" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
@@ -151,7 +148,7 @@ export default function SignupPage() {
                     name="phoneNumber"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Phone Number (Optional)</FormLabel>
+                            <FormLabel>Phone Number</FormLabel>
                             <FormControl>
                                 <PhoneInput
                                     international

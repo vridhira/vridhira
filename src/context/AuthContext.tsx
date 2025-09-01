@@ -23,7 +23,7 @@ import { signIn, signOut } from 'next-auth/react';
 interface AuthContextType {
   user: FirebaseUser | null;
   loading: boolean;
-  signup: (password: string, firstName: string, lastName: string, email?: string, phoneNumber?: string) => Promise<void>;
+  signup: (password: string, firstName: string, lastName: string, email: string, phoneNumber: string) => Promise<void>;
   logout: () => Promise<void>;
   signInWithPhoneNumber: (phoneNumber: string, recaptchaContainerId: string) => Promise<{ verificationId: string | null, remaining: number }>;
   confirmPhoneNumberOtp: (verificationId: string, otp: string) => Promise<FirebaseUser | null>;
@@ -48,32 +48,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const signup = async (password: string, firstName: string, lastName: string, email?: string, phoneNumber?: string) => {
-    if (email) {
-        const existingUser = await findUserByEmail(email);
-        if (existingUser) {
-          throw new Error("An account with this email already exists.");
-        }
+  const signup = async (password: string, firstName: string, lastName: string, email: string, phoneNumber: string) => {
+    const existingUserByEmail = await findUserByEmail(email);
+    if (existingUserByEmail) {
+      throw new Error("An account with this email already exists.");
     }
-    if (phoneNumber) {
-        const existingUser = await findUserByPhoneNumber(phoneNumber);
-        if (existingUser) {
-          throw new Error("An account with this phone number already exists.");
-        }
+
+    const existingUserByPhone = await findUserByPhoneNumber(phoneNumber);
+    if (existingUserByPhone) {
+      throw new Error("An account with this phone number already exists.");
     }
     
     await createUser({ email, phoneNumber, password, firstName, lastName });
     
-    // We only create a Firebase user if they sign up with email.
-    // Phone auth with password doesn't require a separate Firebase user record for this app's logic.
-    if (email) {
-        try {
-            const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-            await updateProfile(userCredential.user, { displayName: `${firstName} ${lastName}` });
-        } catch (firebaseError) {
-            console.error("Firebase signup failed after local user creation:", firebaseError);
-            throw firebaseError;
-        }
+    try {
+        const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+        await updateProfile(userCredential.user, { displayName: `${firstName} ${lastName}` });
+    } catch (firebaseError) {
+        console.error("Firebase signup failed after local user creation:", firebaseError);
+        throw firebaseError;
     }
   };
 

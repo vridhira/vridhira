@@ -49,18 +49,18 @@ export const findUserByPhoneNumber = async (phoneNumber: string): Promise<User |
 export const createUser = async (userData: Partial<User>): Promise<User> => {
   const users = readUsers();
   
-  if (userData.email) {
-      const existingByEmail = await findUserByEmail(userData.email);
-      if(existingByEmail) {
-          throw new Error('User with this email already exists.');
-      }
+  if (!userData.email || !userData.phoneNumber) {
+    throw new Error('Email and phone number are required.');
   }
 
-  if (userData.phoneNumber) {
-      const existingByPhone = await findUserByPhoneNumber(userData.phoneNumber);
-      if(existingByPhone) {
-          throw new Error('User with this phone number already exists.');
-      }
+  const existingByEmail = await findUserByEmail(userData.email);
+  if(existingByEmail) {
+      throw new Error('User with this email already exists.');
+  }
+
+  const existingByPhone = await findUserByPhoneNumber(userData.phoneNumber);
+  if(existingByPhone) {
+      throw new Error('User with this phone number already exists.');
   }
 
   if (!userData.firstName || !userData.lastName) {
