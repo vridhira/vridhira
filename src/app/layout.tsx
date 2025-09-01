@@ -24,16 +24,14 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body>
+      <body className="font-body antialiased bg-background">
         <Providers session={session}>
-          <body className="font-body antialiased bg-background">
             <div className="flex flex-col min-h-screen">
               <Header />
               <main className="flex-grow">{children}</main>
               <Footer />
             </div>
             <Toaster />
-          </body>
         </Providers>
       </body>
     </html>
