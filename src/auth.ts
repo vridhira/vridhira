@@ -42,14 +42,15 @@ export const authConfig = {
             } else {
                 throw new Error("Either email or phone number is required.");
             }
-            
-            if (!user) {
-                // Return null to indicate "user not found" to the client.
-                return null;
-            }
         } catch (error: any) {
-            // Rethrow the specific error message from user-actions
+            // Rethrow the specific error message from user-actions if needed
             throw new Error(error.message);
+        }
+
+        if (!user) {
+          // User not found, return null to indicate failure.
+          // This will be translated into a user-facing error by next-auth.
+          return null;
         }
         
         if (user && user.password) {
@@ -60,7 +61,7 @@ export const authConfig = {
           }
         }
         
-        // Return null to indicate "incorrect password" to the client.
+        // Incorrect password, return null to indicate failure.
         return null;
       },
     }),
