@@ -85,3 +85,17 @@ export const createUser = async (userData: Partial<User>): Promise<User> => {
   const { password, ...userWithoutPassword } = newUser;
   return userWithoutPassword;
 };
+
+export const updateUserPassword = async (phoneNumber: string, newPassword: string): Promise<void> => {
+    const users = readUsers();
+    const userIndex = users.findIndex(u => u.phoneNumber === phoneNumber);
+
+    if (userIndex === -1) {
+        throw new Error("User not found.");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    users[userIndex].password = hashedPassword;
+
+    writeUsers(users);
+}
