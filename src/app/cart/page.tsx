@@ -11,19 +11,23 @@ import { ShoppingCart, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function CartPage() {
-  const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, getCartTotal, cartCount } = useCart();
+  const totalItems = cartCount;
 
   return (
     <div className="container mx-auto py-12 px-4 md:px-6">
-      <header className="mb-8">
-        <h1 className="text-4xl font-headline tracking-tight">Your Shopping Cart</h1>
+      <header className="mb-8 flex items-center gap-4">
+        <ShoppingCart className="h-8 w-8" />
+        <div>
+            <h1 className="text-3xl font-headline tracking-tight">Your Cart</h1>
+            <p className="text-muted-foreground">{totalItems} {totalItems === 1 ? 'item' : 'items'}</p>
+        </div>
       </header>
 
       {cartItems.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-16">
-            <ShoppingCart className="mx-auto h-16 w-16 text-muted-foreground" />
-            <h2 className="mt-4 text-2xl font-semibold">Your cart is empty</h2>
+        <Card className="shadow-none border-dashed">
+          <CardContent className="text-center py-20">
+            <h2 className="text-2xl font-semibold">Your cart is empty</h2>
             <p className="mt-2 text-muted-foreground">
               Looks like you haven't added anything to your cart yet.
             </p>
