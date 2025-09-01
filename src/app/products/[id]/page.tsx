@@ -1,3 +1,4 @@
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { products, artisans, reviews as allReviews } from '@/lib/data';
@@ -17,8 +18,8 @@ import {
 import { AddToCartButton } from '@/components/AddToCartButton';
 
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const product = products.find(p => p.id === params.id) as Product | undefined;
+export default function ProductDetailPage({ params: { id } }: { params: { id: string } }) {
+  const product = products.find(p => p.id === id) as Product | undefined;
   
   if (!product) {
     notFound();
