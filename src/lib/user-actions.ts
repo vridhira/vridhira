@@ -100,3 +100,15 @@ export const updateUserPassword = async (phoneNumber: string, newPassword: strin
 
     writeUsers(users);
 }
+
+export const deleteUser = async (userId: string): Promise<{ success: boolean }> => {
+    const users = readUsers();
+    const filteredUsers = users.filter(u => u.id !== userId);
+
+    if (users.length === filteredUsers.length) {
+        throw new Error("User not found.");
+    }
+
+    writeUsers(filteredUsers);
+    return { success: true };
+}

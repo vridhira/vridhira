@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -11,12 +12,27 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { getOrdersByUserId, Order } from '@/lib/data';
 import { useEffect, useState } from 'react';
+import { deleteUser } from '@/lib/user-actions';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user?.id) {
@@ -37,6 +53,28 @@ export default function AccountPage() {
 
   const user = session?.user;
   const memberSince = user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not available';
+
+  const handleDeleteAccount = async () => {
+    if (!user?.id) return;
+    setIsDeleting(true);
+    try {
+      await deleteUser(user.id);
+      toast({
+        title: "Account Deleted",
+        description: "Your account has been successfully deleted.",
+      });
+      await signOut({ callbackUrl: '/' });
+    } catch (error) {
+      toast({
+        title: "Deletion Failed",
+        description: "Could not delete your account. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+        setIsDeleting(false);
+    }
+  };
+
 
   const getStatusBadgeVariant = (status: Order['status']) => {
     switch (status) {
@@ -88,7 +126,26 @@ export default function AccountPage() {
                     <CardTitle>Account Management</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Button variant="destructive" disabled>Delete Account</Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                         <Button variant="destructive" disabled={isDeleting}>Delete Account</Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your
+                            account and remove your data from our servers.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDeleteAccount} disabled={isDeleting}>
+                            {isDeleting ? 'Deleting...' : 'Yes, delete my account'}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                 </CardContent>
             </Card>
         </div>
