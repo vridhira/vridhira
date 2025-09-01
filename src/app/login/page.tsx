@@ -160,7 +160,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         <Card className="shadow-lg">
           <CardHeader className="text-center">
@@ -169,127 +169,128 @@ export default function LoginPage() {
               Choose your preferred sign-in method.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Button variant="outline" className="w-full h-11 text-sm font-medium" onClick={handleGoogleSignIn}>
-              <Chrome className="mr-2 h-5 w-5" /> Continue with Google
-            </Button>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+          <CardContent>
+            <div className="space-y-4">
+              <Button variant="outline" className="w-full h-11 text-sm font-medium" onClick={handleGoogleSignIn}>
+                <Chrome className="mr-2 h-5 w-5" /> Continue with Google
+              </Button>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                </div>
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
 
-            <Tabs defaultValue="email" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="email">Email</TabsTrigger>
-                <TabsTrigger value="phone">Phone</TabsTrigger>
-              </TabsList>
+              <Tabs defaultValue="email" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="email">Email</TabsTrigger>
+                  <TabsTrigger value="phone">Phone</TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="email">
-                <Form {...emailForm}>
-                  <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4 pt-4">
-                    <FormField
-                      control={emailForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email Address</FormLabel>
-                          <FormControl><Input placeholder="you@example.com" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={emailForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <div className="flex justify-between">
-                            <FormLabel>Password</FormLabel>
-                            <Link href="/forgot-password" passHref>
-                               <span className="text-sm font-medium text-primary hover:underline cursor-pointer">
-                                Forgot password?
-                              </span>
-                            </Link>
-                          </div>
-                          <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" className="w-full h-11" disabled={emailForm.formState.isSubmitting}>
-                        <KeyRound className="mr-2"/> Sign In with Email
-                    </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-
-              <TabsContent value="phone">
-                <Form {...phoneForm}>
-                  <form onSubmit={phoneForm.handleSubmit(onPhoneSubmit)} className="space-y-4 pt-4">
-                    <FormField
-                        control={phoneForm.control}
-                        name="phoneNumber"
+                <TabsContent value="email" className="pt-4">
+                  <Form {...emailForm}>
+                    <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
+                      <FormField
+                        control={emailForm.control}
+                        name="email"
                         render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Phone Number</FormLabel>
-                                <FormControl>
-                                    <PhoneInput
-                                        international
-                                        defaultCountry="US"
-                                        placeholder="Enter phone number"
-                                        {...field}
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        disabled={isBanned || isCheckingPhone}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
+                          <FormItem>
+                            <FormLabel>Email Address</FormLabel>
+                            <FormControl><Input placeholder="you@example.com" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
                         )}
-                    />
-                     {isBanned ? (
-                        <div className="space-y-4 text-center">
-                            <p className="text-sm font-medium text-destructive">
-                                Too many attempts. {getBanTimeRemaining()}
-                            </p>
-                            <Button asChild variant="outline" className="w-full">
-                                <a href="mailto:support@vridhira.com"><Mail className="mr-2"/>Contact Support</a>
-                            </Button>
-                        </div>
-                     ) : (
-                        <>
-                            {!isOtpSent && otpAttemptsRemaining < 5 && (
-                                <p className="text-sm text-center text-yellow-600">
-                                    You have {otpAttemptsRemaining} attempts remaining today.
-                                </p>
-                            )}
-                            {isOtpSent && (
-                            <FormField
-                                control={phoneForm.control}
-                                name="otp"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Verification Code (OTP)</FormLabel>
-                                    <FormControl><Input placeholder="123456" {...field} /></FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                                />
-                            )}
-                            <Button type="submit" className="w-full h-11" disabled={phoneForm.formState.isSubmitting || isBanned || isCheckingPhone}>
-                                <Phone className="mr-2"/>{isOtpSent ? 'Verify & Sign In' : 'Send OTP'}
-                            </Button>
-                        </>
-                     )}
-                  </form>
-                </Form>
-              </TabsContent>
-            </Tabs>
-            <div id="recaptcha-container" style={{display: 'none'}}></div>
+                      />
+                      <FormField
+                        control={emailForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="flex justify-between">
+                              <FormLabel>Password</FormLabel>
+                              <Link href="/forgot-password" passHref>
+                                <span className="text-sm font-medium text-primary hover:underline cursor-pointer">
+                                  Forgot password?
+                                </span>
+                              </Link>
+                            </div>
+                            <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit" className="w-full h-11" disabled={emailForm.formState.isSubmitting}>
+                          <KeyRound className="mr-2"/> Sign In with Email
+                      </Button>
+                    </form>
+                  </Form>
+                </TabsContent>
 
+                <TabsContent value="phone" className="pt-4">
+                  <Form {...phoneForm}>
+                    <form onSubmit={phoneForm.handleSubmit(onPhoneSubmit)} className="space-y-4">
+                      <FormField
+                          control={phoneForm.control}
+                          name="phoneNumber"
+                          render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Phone Number</FormLabel>
+                                  <FormControl>
+                                      <PhoneInput
+                                          international
+                                          defaultCountry="US"
+                                          placeholder="Enter phone number"
+                                          {...field}
+                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                          disabled={isBanned || isCheckingPhone}
+                                      />
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                      />
+                      {isBanned ? (
+                          <div className="space-y-4 text-center">
+                              <p className="text-sm font-medium text-destructive">
+                                  Too many attempts. {getBanTimeRemaining()}
+                              </p>
+                              <Button asChild variant="outline" className="w-full">
+                                  <a href="mailto:support@vridhira.com"><Mail className="mr-2"/>Contact Support</a>
+                              </Button>
+                          </div>
+                      ) : (
+                          <>
+                              {!isOtpSent && otpAttemptsRemaining < 5 && (
+                                  <p className="text-sm text-center text-yellow-600">
+                                      You have {otpAttemptsRemaining} attempts remaining today.
+                                  </p>
+                              )}
+                              {isOtpSent && (
+                              <FormField
+                                  control={phoneForm.control}
+                                  name="otp"
+                                  render={({ field }) => (
+                                      <FormItem>
+                                      <FormLabel>Verification Code (OTP)</FormLabel>
+                                      <FormControl><Input placeholder="123456" {...field} /></FormControl>
+                                      <FormMessage />
+                                      </FormItem>
+                                  )}
+                                  />
+                              )}
+                              <Button type="submit" className="w-full h-11" disabled={phoneForm.formState.isSubmitting || isBanned || isCheckingPhone}>
+                                  <Phone className="mr-2"/>{isOtpSent ? 'Verify & Sign In' : 'Send OTP'}
+                              </Button>
+                          </>
+                      )}
+                    </form>
+                  </Form>
+                </TabsContent>
+              </Tabs>
+              <div id="recaptcha-container" style={{display: 'none', marginTop: '1rem'}}></div>
+            </div>
             <div className="mt-4 text-center text-sm">
               Don't have an account?{" "}
               <Link href="/signup" className="underline">

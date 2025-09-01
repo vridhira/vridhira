@@ -4,66 +4,65 @@
 
 @layer base {
   :root {
-    --background: #FFFFFF; /* White */
-    --foreground: #1A1A1A; /* Rich Black */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
 
-    --card: #FFFFFF;
-    --card-foreground: #1A1A1A;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
 
-    --popover: #FFFFFF;
-    --popover-foreground: #1A1A1A;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: #5D2478; /* Primary Purple */
-    --primary-foreground: #FFFFFF; /* White for text on primary */
+    --primary: 282.4 63.3% 23.5%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: #F5A623; /* Secondary Gold */
-    --secondary-foreground: #1A1A1A; /* Rich Black for text on secondary */
+    --secondary: 35.8 91.7% 55.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: #F3F4F6; /* Light Gray as a muted background */
-    --muted-foreground: #6B7280; /* Gray for muted text */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: #F5A623; /* Using secondary gold as accent */
-    --accent-foreground: #1A1A1A;
+    --accent: 35.8 91.7% 55.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
-    --destructive: #DC2626; /* Red for destructive actions */
-    --destructive-foreground: #FFFFFF;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: #E5E7EB; /* Lighter Gray for borders */
-    --input: #E5E7EB;
-    --ring: #5D2478; /* Primary color for focus rings */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 282.4 63.3% 23.5%;
 
     --radius: 0.5rem;
   }
 
   .dark {
-    /* Keeping a basic dark mode, can be refined later if needed */
-    --background: #1A1A1A;
-    --foreground: #FFFFFF;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
 
-    --card: #2C2C2C;
-    --card-foreground: #FFFFFF;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: #2C2C2C;
-    --popover-foreground: #FFFFFF;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: #9B5DE5; /* Lighter purple for dark mode */
-    --primary-foreground: #FFFFFF;
+    --primary: 282.4 63.3% 23.5%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: #FBBF24; /* Lighter gold for dark mode */
-    --secondary-foreground: #1A1A1A;
+    --secondary: 35.8 91.7% 55.1%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: #374151;
-    --muted-foreground: #9CA3AF;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: #FBBF24;
-    --accent-foreground: #1A1A1A;
+    --accent: 35.8 91.7% 55.1%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: #F87171;
-    --destructive-foreground: #FFFFFF;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: #4B5563;
-    --input: #4B5563;
-    --ring: #9B5DE5;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 282.4 63.3% 23.5%;
   }
 }
 
