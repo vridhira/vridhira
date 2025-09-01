@@ -1,10 +1,22 @@
 
-import NextAuth from 'next-auth';
+import NextAuth, { AuthError } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { findUserByEmail, findUserByPhoneNumber } from '@/lib/user-actions';
 import bcrypt from 'bcrypt';
 import type { NextAuthConfig } from 'next-auth';
 import { User } from './lib/types';
+
+class UserNotFoundError extends AuthError {
+  code = 'UserNotFound';
+}
+
+class InvalidPasswordError extends AuthError {
+  code = 'InvalidPassword';
+}
+
+class MissingPasswordError extends AuthError {
+    code = 'MissingPassword';
+}
 
 export const authConfig = {
   pages: {
@@ -14,19 +26,16 @@ export const authConfig = {
   providers: [
     Credentials({
       async authorize(credentials) {
-        // This function handles credential-based login (email/password or phone/password)
-        
         const { email, phoneNumber, password } = credentials;
 
         if (!password) {
-            // A password is always required for credential-based login.
-            return null;
+            // A password must always be provided for credential-based login.
+            return null; 
         }
 
         let user: User | null | undefined;
         
         try {
-            // Determine whether to find the user by email or phone number
             if (email) {
                 user = await findUserByEmail(email as string);
             } else if (phoneNumber) {
@@ -36,34 +45,31 @@ export const authConfig = {
                 return null;
             }
 
-            // Case 1: User does not exist in the database.
             if (!user) {
-                return null;
+                throw new UserNotFoundError("No user found with the provided credentials.");
             }
 
-            // Case 2: User exists, but they don't have a password set
-            // (e.g., they might have signed up via a social provider).
             if (!user.password) {
-                return null;
+                throw new MissingPasswordError("This account does not have a password set. Try a social login.");
             }
 
-            // Case 3: User exists and has a password. Compare the provided password.
             const passwordsMatch = await bcrypt.compare(password as string, user.password);
 
             if (passwordsMatch) {
-                // Successful login. Return the user object without the password.
                 const { password, ...userWithoutPassword } = user;
                 return userWithoutPassword;
+            } else {
+                throw new InvalidPasswordError("The provided password did not match.");
             }
 
-            // Case 4: Passwords do not match.
-            return null;
-
         } catch (error) {
-            // If any unexpected error occurs (e.g., database connection issue),
-            // log it and prevent login.
-            console.error("Error in authorize function:", error);
-            return null;
+            // Re-throw custom auth errors so NextAuth can handle them
+            if (error instanceof UserNotFoundError || error instanceof InvalidPasswordError || error instanceof MissingPasswordError) {
+                throw error;
+            }
+            // Log unexpected errors and throw a generic one
+            console.error("Unexpected error in authorize function:", error);
+            throw new Error("An unexpected error occurred during authentication.");
         }
       },
     }),

@@ -69,8 +69,17 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-          toast({ title: "Login Failed", description: "Invalid credentials. Please check your email and password.", variant: "destructive" });
-      } else {
+          if (result.error === 'UserNotFound') {
+            toast({
+              title: "No Account Found",
+              description: "No account found with this email. Would you like to create one?",
+              action: <Button onClick={() => router.push('/signup')}>Sign Up</Button>,
+              variant: "destructive",
+            });
+          } else {
+            toast({ title: "Login Failed", description: "Invalid credentials. Please check your email and password.", variant: "destructive" });
+          }
+      } else if (result?.ok) {
           toast({ title: "Login Successful", description: "Welcome back!" });
           router.push('/');
       }
@@ -91,8 +100,17 @@ export default function LoginPage() {
         });
 
         if (result?.error) {
+           if (result.error === 'UserNotFound') {
+            toast({
+              title: "No Account Found",
+              description: "No account found with this phone number. Would you like to create one?",
+              action: <Button onClick={() => router.push('/signup')}>Sign Up</Button>,
+              variant: "destructive",
+            });
+          } else {
             toast({ title: "Login Failed", description: "Invalid credentials. Please check your phone number and password.", variant: "destructive" });
-        } else {
+          }
+        } else if (result?.ok) {
             toast({ title: "Login Successful", description: "Welcome back!" });
             router.push('/');
         }
