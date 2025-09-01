@@ -1,40 +1,216 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Chrome } from 'lucide-react'; // Keeping Chrome icon for now, though not used, it doesn't harm.
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import PhoneInput from 'react-phone-number-input/react-hook-form-input';
+import 'react-phone-number-input/style.css';
+import { Chrome, KeyRound, Phone } from 'lucide-react';
+
+const emailSchema = z.object({
+  email: z.string().email({ message: "Invalid email address." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+});
+
+const phoneSchema = z.object({
+  phoneNumber: z.string().min(10, { message: "Invalid phone number." }),
+  otp: z.string().optional(),
+});
+
 
 export default function LoginPage() {
+  const { login, signInWithGoogle, signInWithPhoneNumber, confirmPhoneNumberOtp } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [verificationId, setVerificationId] = useState<string | null>(null);
+
+  const emailForm = useForm<z.infer<typeof emailSchema>>({
+    resolver: zodResolver(emailSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  const phoneForm = useForm<z.infer<typeof phoneSchema>>({
+    resolver: zodResolver(phoneSchema),
+    defaultValues: { phoneNumber: "" },
+  });
+
+  const onEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
+    try {
+      await login(values.email, values.password);
+      toast({ title: "Login Successful", description: "Welcome back!" });
+      router.push('/account');
+    } catch (error: any) {
+      toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+    }
+  };
+  
+  const onPhoneSubmit = async (values: z.infer<typeof phoneSchema>) => {
+    if (!isOtpSent) {
+      try {
+        const recaptchaContainerId = 'recaptcha-container';
+        // Ensure the container exists and is visible
+        const recaptchaContainer = document.getElementById(recaptchaContainerId);
+        if (recaptchaContainer) {
+            recaptchaContainer.style.display = 'block';
+        }
+        const verId = await signInWithPhoneNumber(values.phoneNumber, recaptchaContainerId);
+        if (verId) {
+            setVerificationId(verId);
+            setIsOtpSent(true);
+            toast({ title: "OTP Sent", description: "Please check your phone for the verification code." });
+        }
+      } catch (error: any) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      }
+    } else {
+      if (verificationId && values.otp) {
+        try {
+          await confirmPhoneNumberOtp(verificationId, values.otp);
+          toast({ title: "Login Successful", description: "Welcome back!" });
+          router.push('/account');
+        } catch (error: any) {
+          toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+        }
+      } else {
+         toast({ title: "Error", description: "OTP is required.", variant: "destructive" });
+      }
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      toast({ title: "Login Successful", description: "Welcome back!" });
+      router.push('/account');
+    } catch (error: any) {
+      toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+    }
+  };
+
   return (
     <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md">
         <Card className="shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="font-headline text-3xl tracking-tight">Welcome Back</CardTitle>
             <CardDescription className="pt-2">
-              Sign in to continue to your VRIDHIRA account.
+              Choose your preferred sign-in method.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-3 pt-2">
-              {/* Removed Google Sign-in Button */}
-              <Button variant="outline" className="w-full h-11 text-sm font-medium">
-                 {/* You can add a placeholder for a traditional email/password login form here later */}
-                 Placeholder Login Button
-              </Button>
+            <Button variant="outline" className="w-full h-11 text-sm font-medium" onClick={handleGoogleSignIn}>
+              <Chrome className="mr-2 h-5 w-5" /> Continue with Google
+            </Button>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              </div>
             </div>
-             <div className="mt-4 text-center text-sm">
-                    Don't have an account?{" "}
-                    <Link href="/signup" className="underline">
-                        Sign up
-                    </Link>
-                </div>
+
+            <Tabs defaultValue="email" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="email">Email</TabsTrigger>
+                <TabsTrigger value="phone">Phone</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="email">
+                <Form {...emailForm}>
+                  <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4 pt-4">
+                    <FormField
+                      control={emailForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email Address</FormLabel>
+                          <FormControl><Input placeholder="you@example.com" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={emailForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full h-11" disabled={emailForm.formState.isSubmitting}>
+                        <KeyRound className="mr-2"/> Sign In with Email
+                    </Button>
+                  </form>
+                </Form>
+              </TabsContent>
+
+              <TabsContent value="phone">
+                <Form {...phoneForm}>
+                  <form onSubmit={phoneForm.handleSubmit(onPhoneSubmit)} className="space-y-4 pt-4">
+                    <FormField
+                        control={phoneForm.control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Phone Number</FormLabel>
+                                <FormControl>
+                                    <PhoneInput
+                                        international
+                                        defaultCountry="US"
+                                        placeholder="Enter phone number"
+                                        {...field}
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    {isOtpSent && (
+                       <FormField
+                          control={phoneForm.control}
+                          name="otp"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Verification Code (OTP)</FormLabel>
+                              <FormControl><Input placeholder="123456" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                    )}
+                    <Button type="submit" className="w-full h-11" disabled={phoneForm.formState.isSubmitting}>
+                      <Phone className="mr-2"/>{isOtpSent ? 'Verify & Sign In' : 'Send OTP'}
+                    </Button>
+                  </form>
+                </Form>
+              </TabsContent>
+            </Tabs>
+            <div id="recaptcha-container" style={{display: 'none'}}></div>
+
+            <div className="mt-4 text-center text-sm">
+              Don't have an account?{" "}
+              <Link href="/signup" className="underline">
+                Sign up
+              </Link>
+            </div>
           </CardContent>
         </Card>
-        <p className="text-center text-sm text-gray-500">
-          By continuing, you agree to VRIDHIRA's <Link href="/terms" className="font-medium text-primary hover:underline">Terms of Service</Link>.
-        </p>
       </div>
     </div>
   );

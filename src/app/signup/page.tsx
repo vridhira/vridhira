@@ -1,0 +1,130 @@
+'use client';
+
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { UserPlus } from 'lucide-react';
+
+const signupSchema = z.object({
+  firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
+  lastName: z.string().min(2, { message: "Last name must be at least 2 characters." }),
+  email: z.string().email({ message: "Invalid email address." }),
+  password: z.string().min(8, { message: "Password must be at least 8 characters." }),
+});
+
+export default function SignupPage() {
+  const { signup } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const form = useForm<z.infer<typeof signupSchema>>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof signupSchema>) => {
+    try {
+      await signup(values.email, values.password, values.firstName, values.lastName);
+      toast({
+        title: "Account Created!",
+        description: "You have been successfully signed up. Welcome to VRIDHIRA!",
+      });
+      router.push('/account');
+    } catch (error: any) {
+      toast({
+        title: "Signup Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
+        <Card className="shadow-lg">
+          <CardHeader className="text-center">
+            <CardTitle className="font-headline text-3xl tracking-tight">Create an Account</CardTitle>
+            <CardDescription className="pt-2">
+              Join our community of artisans and art lovers.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl><Input placeholder="John" {...field} /></FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl><Input placeholder="Doe" {...field} /></FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl><Input placeholder="you@example.com" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full h-11" disabled={form.formState.isSubmitting}>
+                  <UserPlus className="mr-2"/> Create Account
+                </Button>
+              </form>
+            </Form>
+            <div className="mt-4 text-center text-sm">
+              Already have an account?{" "}
+              <Link href="/login" className="underline">
+                Sign in
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
