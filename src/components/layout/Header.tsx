@@ -2,7 +2,7 @@
 'use client';
 
 import Link from "next/link"
-import { Menu, Search, ShoppingCart, User } from "lucide-react"
+import { Menu, Search, ShoppingCart, User, LogOut, LayoutDashboard } from "lucide-react"
 import { useCart } from "@/context/CartContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -62,17 +62,25 @@ export function Header() {
               <AvatarFallback>{session.user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>
-                <p>My Account</p>
-                <p className="text-xs text-muted-foreground font-normal">{session.user?.email}</p>
+          <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{session.user?.name}</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {session.user?.email}
+                </p>
+              </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <Link href="/account"><DropdownMenuItem>Profile</DropdownMenuItem></Link>
-            <DropdownMenuItem disabled>Billing</DropdownMenuItem>
-            <DropdownMenuItem disabled>Settings</DropdownMenuItem>
+            <Link href="/account" passHref>
+              <DropdownMenuItem>
+                <LayoutDashboard className="mr-2" />
+                Profile
+              </DropdownMenuItem>
+            </Link>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

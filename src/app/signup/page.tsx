@@ -10,13 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Chrome, UserPlus } from 'lucide-react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const signupSchema = z.object({
@@ -29,7 +29,7 @@ const signupSchema = z.object({
 
 
 export default function SignupPage() {
-  const { signup, signInWithGoogle } = useAuth();
+  const { data: session, status } = useSession();
   const { toast } = useToast();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
@@ -37,6 +37,12 @@ export default function SignupPage() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/account');
+    }
+  }, [status, router]);
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -51,49 +57,82 @@ export default function SignupPage() {
 
   const onSubmit = async (values: z.infer<typeof signupSchema>) => {
     try {
-      await signup(values.password, values.firstName, values.lastName, values.email, values.phoneNumber);
+      const signupResponse = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
+
+      if (!signupResponse.ok) {
+        const errorData = await signupResponse.json();
+        throw new Error(errorData.message || "An unknown error occurred during signup.");
+      }
+
       toast({
         title: "Account Created!",
         description: "You have been successfully signed up. Welcome to VRIDHIRA!",
       });
-      // Log the user in automatically after signup
+
       const result = await signIn('credentials', {
           email: values.email,
           password: values.password,
           redirect: false,
       });
-       if (result?.error) {
+
+      if (result?.error) {
         toast({ title: "Login Failed", description: "Automatic login failed, please try logging in manually.", variant: "destructive" });
         router.push('/login');
       } else {
         router.push('/');
       }
     } catch (error: any) {
-       if (error.message.includes("already exists")) {
-            toast({
-                title: "Account Exists",
-                description: error.message,
-                variant: "destructive",
-            });
-        } else {
-            toast({
-                title: "Signup Failed",
-                description: "An unexpected error occurred. Please try again.",
-                variant: "destructive",
-            });
-        }
+      toast({
+          title: "Signup Failed",
+          description: error.message,
+          variant: "destructive",
+      });
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithGoogle();
+      await signIn('google', { callbackUrl: '/' });
       toast({ title: "Sign Up Successful", description: "Welcome to VRIDHIRA!" });
-      router.push('/');
     } catch (error: any) {
       toast({ title: "Sign Up Failed", description: "Could not sign in with Google. Please try again.", variant: "destructive" });
     }
   };
+
+  if (status === 'loading' || status === 'authenticated') {
+    return (
+        <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="w-full max-w-md space-y-8">
+                <Card>
+                    <CardHeader className="text-center">
+                        <Skeleton className="h-8 w-3/4 mx-auto" />
+                        <Skeleton className="h-4 w-1/2 mx-auto" />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                       <Skeleton className="h-11 w-full" />
+                        <div className="flex items-center">
+                             <Skeleton className="h-px w-full" />
+                            <span className="mx-2 text-muted-foreground text-xs">OR</span>
+                             <Skeleton className="h-px w-full" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-11 w-full" />
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

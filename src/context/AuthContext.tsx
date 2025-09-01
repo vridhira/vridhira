@@ -3,34 +3,28 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
-  User as FirebaseUser,
   onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  signOut as firebaseSignOut,
   RecaptchaVerifier,
   signInWithPhoneNumber as firebaseSignInWithPhoneNumber,
-  updateProfile,
-  signInWithCredential,
   PhoneAuthProvider,
   sendPasswordResetEmail as firebaseSendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithPopup,
+  User as FirebaseUser,
+  signOut as firebaseSignOut,
 } from 'firebase/auth';
 import { auth as firebaseAuth } from '@/lib/firebase';
-import { createUser, findUserByEmail, findUserByPhoneNumber } from '@/lib/user-actions';
+import { findUserByPhoneNumber } from '@/lib/user-actions';
 import { checkAndRecordOtpAttempt } from '@/lib/otp-actions';
-import { signIn, signOut as nextAuthSignOut } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 
 
 interface AuthContextType {
   user: FirebaseUser | null;
   loading: boolean;
-  signup: (password: string, firstName: string, lastName: string, email: string, phoneNumber: string) => Promise<void>;
-  logout: () => Promise<void>;
   signInWithPhoneNumber: (phoneNumber: string, recaptchaContainerId: string) => Promise<{ verificationId: string | null, remaining: number }>;
-  confirmPhoneNumberOtp: (verificationId: string, otp: string) => Promise<FirebaseUser | null>;
+  confirmPhoneNumberOtp: (verificationId: string, otp: string) => Promise<boolean>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,53 +35,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(firebaseAuth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        setUser(null);
-      }
+      setUser(currentUser);
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
-
-  const signup = async (password: string, firstName: string, lastName: string, email: string, phoneNumber: string) => {
-    const existingUserByEmail = await findUserByEmail(email);
-    if (existingUserByEmail) {
-      throw new Error("An account with this email already exists.");
-    }
-
-    const existingUserByPhone = await findUserByPhoneNumber(phoneNumber);
-    if (existingUserByPhone) {
-      throw new Error("An account with this phone number already exists.");
-    }
-    
-    await createUser({ email, phoneNumber, password, firstName, lastName });
-    
-    try {
-        const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-        await updateProfile(userCredential.user, { displayName: `${firstName} ${lastName}` });
-    } catch (firebaseError) {
-        console.error("Firebase signup failed after local user creation:", firebaseError);
-        // This is a critical error, might need cleanup logic for the user created in the local file system.
-        // For now, we re-throw to notify the caller.
-        throw firebaseError;
-    }
-  };
-
-  const logout = async () => {
-    try {
-      // Signs out of next-auth session and redirects
-      await nextAuthSignOut({ redirect: true, callbackUrl: '/' }); 
-      // Signs out of firebase session
-      await firebaseSignOut(firebaseAuth);
-    } catch (error) {
-      console.error("Error logging out:", error);
-      // Even if one fails, we should probably attempt the other, but for now, we just throw.
-      throw error;
-    }
-  };
-
 
   const signInWithPhoneNumber = async (phoneNumber: string, recaptchaContainerId: string) => {
     const userExists = await findUserByPhoneNumber(phoneNumber);
@@ -97,11 +49,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     const attemptResult = await checkAndRecordOtpAttempt(phoneNumber);
     if (!attemptResult.success) {
-      // Re-throwing an object to pass detailed info to the component
       throw { message: attemptResult.message, bannedUntil: attemptResult.bannedUntil };
     }
 
-    // Ensure the reCAPTCHA container is visible or handled correctly by Firebase
     const recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, recaptchaContainerId, {
     'size': 'invisible',
     'callback': () => {},
@@ -114,20 +64,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const confirmPhoneNumberOtp = async (verificationId: string, otp: string) => {
      const credential = PhoneAuthProvider.credential(verificationId, otp);
-     const result = await signInWithCredential(firebaseAuth, credential);
-     
-     if (!result.user.phoneNumber) {
-        throw new Error("Could not retrieve phone number from Firebase.");
-     }
-
-     const existingUser = await findUserByPhoneNumber(result.user.phoneNumber);
-     if (!existingUser) {
-        // This should theoretically not happen if the initial check in `signInWithPhoneNumber` passes
-        throw new Error("User not found after phone verification.");
-     }
-     
-     // This flow is only for password reset. Actual login happens on the login page with credentials.
-     return result.user;
+     // This just verifies the OTP with Firebase, it doesn't sign the user in to our system.
+     // We need to do this to confirm ownership before allowing a password reset.
+     await firebaseAuth.signInWithCredential(credential);
+     // We don't want to keep the user signed in to Firebase at this stage.
+     await firebaseSignOut(firebaseAuth);
+     return true;
   };
 
   const sendPasswordResetEmail = async (email: string) => {
@@ -139,62 +81,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(firebaseAuth, provider);
-      const googleUser = result.user;
-      if (!googleUser.email) {
-        throw new Error("Could not retrieve email from Google.");
-      }
-
-      let dbUser = await findUserByEmail(googleUser.email);
-
-      if (!dbUser) {
-        const nameParts = googleUser.displayName?.split(' ') ?? [''];
-        const firstName = nameParts[0];
-        const lastName = nameParts.slice(1).join(' ') || 'User';
-
-        // A placeholder is needed as phone is required, but not provided by Google.
-        // In a real app, you might redirect to a page to complete the profile.
-        const placeholderPhoneNumber = `+${Date.now()}`;
-
-        dbUser = await createUser({
-          id: googleUser.uid,
-          email: googleUser.email,
-          firstName,
-          lastName,
-          phoneNumber: placeholderPhoneNumber, // Or handle this differently
-        });
-      }
-
-      // Now, sign in to next-auth to create a session
-      const nextAuthResult = await signIn('credentials', {
-        redirect: false,
-        user: JSON.stringify(dbUser), // Pass the user object to the authorize function
-      });
-
-      if (nextAuthResult?.error) {
-        // This will be caught and shown as a toast on the UI
-        throw new Error(nextAuthResult.error);
-      }
-
-    } catch (error: any) {
-      console.error("Google Sign-In failed:", error);
-      throw error; // Re-throw to be caught by the component
-    }
-  };
-
   return (
     <AuthContext.Provider value={{
       user,
       loading,
-      signup,
-      logout,
       signInWithPhoneNumber,
       confirmPhoneNumberOtp,
       sendPasswordResetEmail,
-      signInWithGoogle,
     }}>
       {children}
     </AuthContext.Provider>

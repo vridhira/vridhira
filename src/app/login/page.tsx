@@ -10,14 +10,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { Chrome, KeyRound, Phone } from 'lucide-react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const emailSchema = z.object({
@@ -32,15 +32,21 @@ const phoneSchema = z.object({
 
 
 export default function LoginPage() {
+  const { data: session, status } = useSession();
   const { toast } = useToast();
-  const { signInWithGoogle } = useAuth();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
-  
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/account');
+    }
+  }, [status, router]);
+
   const emailForm = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
     defaultValues: { email: "", password: "" },
@@ -84,13 +90,46 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithGoogle();
+      // The signIn function from next-auth/react handles the Google flow when called with the provider's id
+      await signIn('google', { callbackUrl: '/' });
       toast({ title: "Login Successful", description: "Welcome back!" });
-      router.push('/');
     } catch (error: any) {
       toast({ title: "Login Failed", description: "Could not sign in with Google. Please try again.", variant: "destructive" });
     }
   };
+
+  if (status === 'loading' || status === 'authenticated') {
+    return (
+        <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="w-full max-w-md space-y-8">
+                <Card>
+                    <CardHeader>
+                        <Skeleton className="h-8 w-3/4 mx-auto" />
+                        <Skeleton className="h-4 w-1/2 mx-auto" />
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <Skeleton className="h-11 w-full" />
+                        <div className="flex items-center">
+                            <Skeleton className="h-px w-full" />
+                            <span className="mx-2 text-muted-foreground text-xs">OR</span>
+                             <Skeleton className="h-px w-full" />
+                        </div>
+                        <Skeleton className="h-10 w-full" />
+                        <div className="space-y-4">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                        <div className="space-y-4">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                        <Skeleton className="h-11 w-full" />
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    );
+  }
 
 
   return (
