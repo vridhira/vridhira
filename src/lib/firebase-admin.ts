@@ -1,22 +1,22 @@
 import * as admin from 'firebase-admin';
+import path from 'path';
 
-// Ensure the private key is properly formatted
-const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n');
-
-const serviceAccount: admin.ServiceAccount = {
-    projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-    privateKey: privateKey,
-};
+// Load the service account key JSON file
+// Ensure this path is correct relative to your project root
+const serviceAccountPath = path.resolve(process.cwd(), 'serviceAccountKey.json');
 
 if (!admin.apps.length) {
   try {
+    const serviceAccount = require(serviceAccountPath); // Dynamically load the JSON
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+      credential: admin.credential.cert(serviceAccount),
+      // Other options if needed (e.g., databaseURL for Realtime Database)
     });
-  } catch (error: any) {
-    console.error('Firebase admin initialization error', error.stack);
+  } catch (error) {
+    console.error("Failed to initialize Firebase Admin SDK. Make sure 'serviceAccountKey.json' exists and is correctly configured.", error);
+    // You might want to throw the error or handle it more gracefully in production
   }
 }
 
-export default admin;
+export const auth = admin.auth();
+export const firestore = admin.firestore();
