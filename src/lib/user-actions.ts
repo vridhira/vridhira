@@ -22,7 +22,8 @@ const readUsers = (): User[] => {
     return JSON.parse(data) as User[];
   } catch (error) {
     console.error("Error reading users file:", error);
-    return [];
+    // In a real app, you might want to throw a more specific error or handle it differently
+    throw new Error("Could not read user data.");
   }
 };
 
@@ -31,6 +32,7 @@ const writeUsers = (users: User[]) => {
     fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
   } catch (error) {
     console.error("Error writing users file:", error);
+    throw new Error("Could not save user data.");
   }
 };
 
@@ -47,18 +49,19 @@ export const findUserByPhoneNumber = async (phoneNumber: string): Promise<User |
 }
 
 export const createUser = async (userData: Partial<User>): Promise<User> => {
-  const users = readUsers();
   
   if (!userData.email || !userData.phoneNumber) {
     throw new Error('Email and phone number are required.');
   }
 
-  const existingByEmail = await findUserByEmail(userData.email);
+  const users = readUsers();
+  
+  const existingByEmail = users.find(u => u.email === userData.email);
   if(existingByEmail) {
       throw new Error('User with this email already exists.');
   }
 
-  const existingByPhone = await findUserByPhoneNumber(userData.phoneNumber);
+  const existingByPhone = users.find(u => u.phoneNumber === userData.phoneNumber);
   if(existingByPhone) {
       throw new Error('User with this phone number already exists.');
   }

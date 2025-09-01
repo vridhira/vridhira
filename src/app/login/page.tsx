@@ -17,6 +17,7 @@ import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { Chrome, KeyRound, Phone } from 'lucide-react';
 import { signIn } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 
 
 const emailSchema = z.object({
@@ -34,6 +35,11 @@ export default function LoginPage() {
   const { toast } = useToast();
   const { signInWithGoogle } = useAuth();
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   const emailForm = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
@@ -159,7 +165,7 @@ export default function LoginPage() {
                 <TabsContent value="phone" className="pt-4">
                   <Form {...phoneForm}>
                     <form onSubmit={phoneForm.handleSubmit(onPhoneSubmit)} className="space-y-4">
-                      <FormField
+                      {isClient && <FormField
                           control={phoneForm.control}
                           name="phoneNumber"
                           render={({ field }) => (
@@ -177,7 +183,7 @@ export default function LoginPage() {
                                   <FormMessage />
                               </FormItem>
                           )}
-                      />
+                      />}
                       <FormField
                         control={phoneForm.control}
                         name="password"

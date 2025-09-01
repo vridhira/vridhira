@@ -31,8 +31,8 @@ export const authConfig = {
         if (!password) {
           throw new Error("Password is required for this login method.");
         }
-
-        let user: User | undefined;
+        
+        let user: User | undefined | null;
 
         try {
             if (email) {
@@ -43,26 +43,32 @@ export const authConfig = {
                 throw new Error("Either email or phone number is required.");
             }
         } catch (error: any) {
-            // Rethrow the specific error message from user-actions if needed
-            throw new Error(error.message);
+             // Log the server-side error
+            console.error("Error finding user:", error);
+            // Throw a generic error to the client
+            throw new Error("An internal server error occurred.");
         }
 
         if (!user) {
-          // User not found, return null to indicate failure.
-          // This will be translated into a user-facing error by next-auth.
-          return null;
+            // User not found, throw a specific error for next-auth to catch.
+            throw new Error("No user found with the provided credentials.");
         }
         
-        if (user && user.password) {
-          const passwordMatch = await bcrypt.compare(password as string, user.password);
-          if (passwordMatch) {
+        if (!user.password) {
+            // This case handles users who signed up via a social provider
+            // and are trying to log in with credentials.
+            throw new Error("This account does not have a password set. Please use a social login provider.");
+        }
+        
+        const passwordMatch = await bcrypt.compare(password as string, user.password);
+        
+        if (passwordMatch) {
             const { password, ...userWithoutPassword } = user;
             return userWithoutPassword;
-          }
         }
         
-        // Incorrect password, return null to indicate failure.
-        return null;
+        // Incorrect password, throw specific error.
+        throw new Error("Invalid password.");
       },
     }),
   ],
