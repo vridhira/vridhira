@@ -44,7 +44,8 @@ export const authConfig = {
             }
             
             if (!user) {
-                throw new Error("No user found with the provided credentials.");
+                // Return null to indicate "user not found" to the client.
+                return null;
             }
         } catch (error: any) {
             // Rethrow the specific error message from user-actions
@@ -59,7 +60,8 @@ export const authConfig = {
           }
         }
         
-        throw new Error("Incorrect password.");
+        // Return null to indicate "incorrect password" to the client.
+        return null;
       },
     }),
   ],
