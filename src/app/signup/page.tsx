@@ -57,12 +57,17 @@ export default function SignupPage() {
         description: "You have been successfully signed up. Welcome to VRIDHIRA!",
       });
       // Log the user in automatically after signup
-      await signIn('credentials', {
+      const result = await signIn('credentials', {
           email: values.email,
           password: values.password,
           redirect: false,
       });
-      router.push('/account');
+       if (result?.error) {
+        toast({ title: "Login Failed", description: "Automatic login failed, please try logging in manually.", variant: "destructive" });
+        router.push('/login');
+      } else {
+        router.push('/');
+      }
     } catch (error: any) {
        if (error.message.includes("already exists")) {
             toast({
@@ -73,7 +78,7 @@ export default function SignupPage() {
         } else {
             toast({
                 title: "Signup Failed",
-                description: error.message,
+                description: "An unexpected error occurred. Please try again.",
                 variant: "destructive",
             });
         }
@@ -84,7 +89,7 @@ export default function SignupPage() {
     try {
       await signInWithGoogle();
       toast({ title: "Sign Up Successful", description: "Welcome to VRIDHIRA!" });
-      router.push('/account');
+      router.push('/');
     } catch (error: any) {
       toast({ title: "Sign Up Failed", description: "Could not sign in with Google. Please try again.", variant: "destructive" });
     }

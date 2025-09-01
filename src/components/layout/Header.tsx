@@ -16,8 +16,17 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { Badge } from "../ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 const navLinks = [
   { href: "/products", label: "Products" },
@@ -29,6 +38,57 @@ export function Header() {
   const { data: session, status } = useSession();
   const { cartCount } = useCart();
   const isLoading = status === 'loading';
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/' });
+  };
+
+
+  const UserNav = () => {
+    if (isLoading) {
+      return (
+        <Avatar className="h-9 w-9">
+          <AvatarFallback>?</AvatarFallback>
+        </Avatar>
+      )
+    }
+    
+    if (session) {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Avatar className="h-9 w-9 cursor-pointer">
+              <AvatarImage src={session.user?.image ?? ''} alt={session.user?.name ?? 'User'} />
+              <AvatarFallback>{session.user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>
+                <p>My Account</p>
+                <p className="text-xs text-muted-foreground font-normal">{session.user?.email}</p>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <Link href="/account"><DropdownMenuItem>Profile</DropdownMenuItem></Link>
+            <DropdownMenuItem disabled>Billing</DropdownMenuItem>
+            <DropdownMenuItem disabled>Settings</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout}>
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
+
+    return (
+       <Link href="/login">
+          <Button variant="ghost" size="icon">
+            <User className="h-5 w-5" />
+            <span className="sr-only">Account</span>
+          </Button>
+        </Link>
+    )
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg">
@@ -77,21 +137,7 @@ export function Header() {
                 <span className="sr-only">Shopping Cart</span>
               </Button>
             </Link>
-            {!isLoading && session ? (
-              <Link href="/account">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src={session.user?.image ?? ''} alt={session.user?.name ?? 'User'} />
-                  <AvatarFallback>{session.user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
-              </Link>
-            ) : (
-              <Link href="/login">
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                  <span className="sr-only">Account</span>
-                </Button>
-              </Link>
-            )}
+            <UserNav />
           </nav>
           
           {/* Mobile Menu and Actions */}
@@ -104,21 +150,7 @@ export function Header() {
                   <span className="sr-only">Shopping Cart</span>
                 </Button>
               </Link>
-              {!isLoading && session ? (
-                <Link href="/account">
-                   <Avatar className="h-9 w-9">
-                    <AvatarImage src={session.user?.image ?? ''} alt={session.user?.name ?? 'User'} />
-                    <AvatarFallback>{session.user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                </Link>
-              ) : (
-                <Link href="/login">
-                  <Button variant="ghost" size="icon">
-                    <User className="h-5 w-5" />
-                    <span className="sr-only">Account</span>
-                  </Button>
-                </Link>
-              )}
+              <UserNav />
             </nav>
             <Sheet>
               <SheetTrigger asChild>

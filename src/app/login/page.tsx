@@ -60,10 +60,10 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-        toast({ title: "Login Failed", description: result.error, variant: "destructive" });
+        toast({ title: "Login Failed", description: "Invalid credentials. Please check your email and password.", variant: "destructive" });
     } else {
         toast({ title: "Login Successful", description: "Welcome back!" });
-        router.push('/account');
+        router.push('/');
     }
   };
   
@@ -75,10 +75,10 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-        toast({ title: "Login Failed", description: result.error, variant: "destructive" });
+        toast({ title: "Login Failed", description: "Invalid credentials. Please check your phone number and password.", variant: "destructive" });
     } else {
         toast({ title: "Login Successful", description: "Welcome back!" });
-        router.push('/account');
+        router.push('/');
     }
   };
 
@@ -86,7 +86,7 @@ export default function LoginPage() {
     try {
       await signInWithGoogle();
       toast({ title: "Login Successful", description: "Welcome back!" });
-      router.push('/account');
+      router.push('/');
     } catch (error: any) {
       toast({ title: "Login Failed", description: "Could not sign in with Google. Please try again.", variant: "destructive" });
     }

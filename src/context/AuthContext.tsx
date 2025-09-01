@@ -19,7 +19,7 @@ import {
 import { auth as firebaseAuth } from '@/lib/firebase';
 import { createUser, findUserByEmail, findUserByPhoneNumber } from '@/lib/user-actions';
 import { checkAndRecordOtpAttempt } from '@/lib/otp-actions';
-import { signIn, signOut } from 'next-auth/react';
+import { signIn, signOut as nextAuthSignOut } from 'next-auth/react';
 
 
 interface AuthContextType {
@@ -69,16 +69,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await updateProfile(userCredential.user, { displayName: `${firstName} ${lastName}` });
     } catch (firebaseError) {
         console.error("Firebase signup failed after local user creation:", firebaseError);
+        // This is a critical error, might need cleanup logic for the user created in the local file system.
+        // For now, we re-throw to notify the caller.
         throw firebaseError;
     }
   };
 
   const logout = async () => {
     try {
-      await signOut({ redirect: true, callbackUrl: '/login' });
+      // Signs out of next-auth session and redirects
+      await nextAuthSignOut({ redirect: true, callbackUrl: '/' }); 
+      // Signs out of firebase session
       await firebaseSignOut(firebaseAuth);
     } catch (error) {
       console.error("Error logging out:", error);
+      // Even if one fails, we should probably attempt the other, but for now, we just throw.
       throw error;
     }
   };
@@ -92,9 +97,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     const attemptResult = await checkAndRecordOtpAttempt(phoneNumber);
     if (!attemptResult.success) {
+      // Re-throwing an object to pass detailed info to the component
       throw { message: attemptResult.message, bannedUntil: attemptResult.bannedUntil };
     }
 
+    // Ensure the reCAPTCHA container is visible or handled correctly by Firebase
     const recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, recaptchaContainerId, {
     'size': 'invisible',
     'callback': () => {},
@@ -115,10 +122,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
      const existingUser = await findUserByPhoneNumber(result.user.phoneNumber);
      if (!existingUser) {
+        // This should theoretically not happen if the initial check in `signInWithPhoneNumber` passes
         throw new Error("User not found after phone verification.");
      }
      
-     // This flow is only for password reset. Actual login happens on the login page.
+     // This flow is only for password reset. Actual login happens on the login page with credentials.
      return result.user;
   };
 
@@ -167,12 +175,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (nextAuthResult?.error) {
+        // This will be caught and shown as a toast on the UI
         throw new Error(nextAuthResult.error);
       }
 
     } catch (error: any) {
       console.error("Google Sign-In failed:", error);
-      throw error;
+      throw error; // Re-throw to be caught by the component
     }
   };
 
