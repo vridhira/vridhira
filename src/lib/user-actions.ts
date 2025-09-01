@@ -48,7 +48,7 @@ export const findUserByPhoneNumber = async (phoneNumber: string): Promise<User |
     return users.find((user) => user.phoneNumber === phoneNumber);
 }
 
-export const createUser = async (userData: Partial<User>): Promise<User> => {
+export const createUser = async (userData: Omit<User, 'id'>): Promise<User> => {
   
   if (!userData.email || !userData.phoneNumber) {
     throw new Error('Email and phone number are required.');
@@ -76,12 +76,9 @@ export const createUser = async (userData: Partial<User>): Promise<User> => {
   }
 
   const newUser: User = {
-    id: userData.id || Date.now().toString(),
-    firstName: userData.firstName,
-    lastName: userData.lastName,
-    email: userData.email,
-    phoneNumber: userData.phoneNumber,
-    password: hashedPassword
+    id: Date.now().toString(),
+    ...userData,
+    password: hashedPassword,
   };
   users.push(newUser);
   writeUsers(users);

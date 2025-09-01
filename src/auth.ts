@@ -14,7 +14,7 @@ export const authConfig = {
   providers: [
     Credentials({
       async authorize(credentials) {
-        // For Google Sign-In, we pass a user object directly.
+        // For Google Sign-In, we might pass a user object directly.
         if (credentials.user) {
            try {
             const user = JSON.parse(credentials.user as string) as User;
@@ -22,7 +22,6 @@ export const authConfig = {
             const { password, ...userWithoutPassword } = user;
             return userWithoutPassword;
            } catch (e) {
-             // If parsing fails, it's an invalid request.
              console.error("Invalid user data for social sign in:", e);
              return null;
            }
@@ -31,8 +30,7 @@ export const authConfig = {
         const { email, phoneNumber, password } = credentials;
 
         if (!password) {
-            // This should not happen with the current forms, but it's a good safeguard.
-            console.error("Authorize error: Password is required.");
+            console.error("Authorize error: Password is required for credential login.");
             return null;
         }
         
@@ -44,31 +42,28 @@ export const authConfig = {
             } else if (phoneNumber) {
               user = await findUserByPhoneNumber(phoneNumber as string);
             } else {
-                // This case should not be reached if the form is submitted correctly
                 console.error("Authorize error: Either email or phone number is required.");
                 return null;
             }
         } catch (error: any) {
-            // This catches errors from the file system (readUsers)
             console.error("Error finding user in authorize function:", error);
-            // We return null to tell NextAuth it's a server error without crashing.
-            // NextAuth will show a generic error message.
-            return null;
+            // This indicates a server-side problem (e.g., can't read file)
+            // It's better to throw an error here so it can be debugged.
+            // Returning null would imply a user-facing error like "user not found".
+            throw new Error("There was a server error during authentication.");
         }
 
+        // Case 1: User not found
         if (!user) {
-            // User not found. This is a valid failure case.
-            // Returning null will result in a "CredentialsSignin" error on the client.
-            // We can map this to a user-friendly message on the login page.
             return null; 
         }
         
+        // Case 2: User exists but signed up via a social provider (no password)
         if (!user.password) {
-            // This case handles users who signed up via a social provider
-            // and are trying to log in with credentials.
             return null;
         }
         
+        // Case 3: User exists, has a password, now compare it
         const passwordMatch = await bcrypt.compare(password as string, user.password);
         
         if (passwordMatch) {
@@ -76,7 +71,7 @@ export const authConfig = {
             return userWithoutPassword; // Success!
         }
         
-        // Incorrect password. This is a valid failure case.
+        // Case 4: Password does not match
         return null;
       },
     }),
@@ -91,8 +86,11 @@ export const authConfig = {
         if (dbUser) {
            token.name = `${dbUser.firstName} ${dbUser.lastName}`;
            token.email = dbUser.email;
-           // Preserve the image from the auth provider (e.g., Google)
-           token.image = dbUser.image || user.image; 
+           token.image = user.image || dbUser.image;
+        } else {
+           token.name = user.name
+           token.email = user.email
+           token.image = user.image
         }
       }
       return token;
