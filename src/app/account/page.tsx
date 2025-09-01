@@ -20,9 +20,7 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user?.id) {
-      // In a real app, you'd pass session.user.id.
-      // For our mock, the function will return data for 'mock-user-id'
-      getOrdersByUserId('mock-user-id').then(userOrders => {
+      getOrdersByUserId(session.user.id).then(userOrders => {
         setOrders(userOrders);
         setIsLoadingOrders(false);
       });
@@ -43,8 +41,8 @@ export default function AccountPage() {
   const getStatusBadgeVariant = (status: Order['status']) => {
     switch (status) {
         case 'Delivered': return 'default';
-        case 'Shipped': return 'default';
-        case 'Processing': return 'secondary';
+        case 'Shipped': return 'secondary';
+        case 'Processing': return 'outline';
         case 'Cancelled': return 'destructive';
         default: return 'outline';
     }

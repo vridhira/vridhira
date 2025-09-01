@@ -40,6 +40,7 @@ export type Review = {
 
 export type Order = {
   id: string;
+  userId: string;
   date: string;
   status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   total: number;
@@ -159,9 +160,15 @@ export const reviews: Review[] = [
     { id: 'rev-3', productId: '2', author: 'Priya K.', rating: 5, comment: 'The scarf is so soft and the block print is perfect. I get so many compliments!', date: '2023-04-20' },
 ];
 
+const mockUsers: User[] = [
+    { id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com' },
+    { id: 'user-2', firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com' },
+]
+
 const orders: Order[] = [
     {
         id: 'ORD-001',
+        userId: 'user-1',
         date: '2023-10-26',
         status: 'Delivered',
         total: 70.00,
@@ -172,6 +179,7 @@ const orders: Order[] = [
     },
     {
         id: 'ORD-002',
+        userId: 'user-1',
         date: '2023-11-05',
         status: 'Shipped',
         total: 90.00,
@@ -182,6 +190,7 @@ const orders: Order[] = [
     },
     {
         id: 'ORD-003',
+        userId: 'user-2',
         date: '2023-11-12',
         status: 'Processing',
         total: 35.00,
@@ -193,7 +202,8 @@ const orders: Order[] = [
 
 // In a real app, this would fetch from a database
 export async function getOrdersByUserId(userId: string): Promise<Order[]> {
-    // This is a mock implementation. It ignores the userId and returns all orders.
-    // In a real scenario, you would filter orders based on the userId.
-    return Promise.resolve(orders);
+    // This is a mock implementation. It ignores the userId and returns all orders for 'user-1'
+    // for demonstration purposes. In a real scenario, you would filter orders based on the userId.
+    const userOrders = orders.filter(order => order.userId === 'user-1');
+    return Promise.resolve(userOrders);
 }
