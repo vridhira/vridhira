@@ -2,64 +2,68 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: white;
-}
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --background: #FFFFFF; /* White */
+    --foreground: #1A1A1A; /* Rich Black */
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card: #FFFFFF;
+    --card-foreground: #1A1A1A;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover: #FFFFFF;
+    --popover-foreground: #1A1A1A;
 
-    --primary: 275 82% 40%;
-    --primary-foreground: 0 0% 98%;
+    --primary: #5D2478; /* Primary Purple */
+    --primary-foreground: #FFFFFF; /* White for text on primary */
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: #F5A623; /* Secondary Gold */
+    --secondary-foreground: #1A1A1A; /* Rich Black for text on secondary */
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: #F3F4F6; /* Light Gray as a muted background */
+    --muted-foreground: #6B7280; /* Gray for muted text */
 
-    --accent: 14 83% 60%;
-    --accent-foreground: 0 0% 98%;
+    --accent: #F5A623; /* Using secondary gold as accent */
+    --accent-foreground: #1A1A1A;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: #DC2626; /* Red for destructive actions */
+    --destructive-foreground: #FFFFFF;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
+    --border: #E5E7EB; /* Lighter Gray for borders */
+    --input: #E5E7EB;
+    --ring: #5D2478; /* Primary color for focus rings */
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    /* Keeping a basic dark mode, can be refined later if needed */
+    --background: #1A1A1A;
+    --foreground: #FFFFFF;
+
+    --card: #2C2C2C;
+    --card-foreground: #FFFFFF;
+
+    --popover: #2C2C2C;
+    --popover-foreground: #FFFFFF;
+
+    --primary: #9B5DE5; /* Lighter purple for dark mode */
+    --primary-foreground: #FFFFFF;
+
+    --secondary: #FBBF24; /* Lighter gold for dark mode */
+    --secondary-foreground: #1A1A1A;
+
+    --muted: #374151;
+    --muted-foreground: #9CA3AF;
+
+    --accent: #FBBF24;
+    --accent-foreground: #1A1A1A;
+
+    --destructive: #F87171;
+    --destructive-foreground: #FFFFFF;
+
+    --border: #4B5563;
+    --input: #4B5563;
+    --ring: #9B5DE5;
   }
 }
 
