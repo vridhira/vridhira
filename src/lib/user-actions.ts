@@ -40,21 +40,30 @@ export const findUserByEmail = async (email: string): Promise<User | undefined> 
 };
 
 export const findUserByPhoneNumber = async (phoneNumber: string): Promise<User | undefined> => {
+    if (!phoneNumber) return undefined;
     const users = readUsers();
     return users.find((user) => user.phoneNumber === phoneNumber);
 }
 
 export const createUser = async (userData: Partial<User>): Promise<User> => {
   const users = readUsers();
-  if (!userData.email || !userData.firstName || !userData.lastName) {
-    throw new Error('First name, last name and email are required to create a user.');
-  }
-
-  if(userData.email) {
-      const existing = await findUserByEmail(userData.email);
-      if(existing) {
+  
+  if (userData.email) {
+      const existingByEmail = await findUserByEmail(userData.email);
+      if(existingByEmail) {
           throw new Error('User with this email already exists.');
       }
+  }
+
+  if (userData.phoneNumber) {
+      const existingByPhone = await findUserByPhoneNumber(userData.phoneNumber);
+      if(existingByPhone) {
+          throw new Error('User with this phone number already exists.');
+      }
+  }
+
+  if (!userData.firstName || !userData.lastName) {
+    throw new Error('First name and last name are required to create a user.');
   }
 
   let hashedPassword = userData.password;
@@ -64,10 +73,10 @@ export const createUser = async (userData: Partial<User>): Promise<User> => {
 
   const newUser: User = {
     id: userData.id || Date.now().toString(),
-    ...userData,
-    email: userData.email,
     firstName: userData.firstName,
     lastName: userData.lastName,
+    email: userData.email,
+    phoneNumber: userData.phoneNumber,
     password: hashedPassword
   };
   users.push(newUser);

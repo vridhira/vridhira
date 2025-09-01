@@ -44,21 +44,30 @@ export default function SignupPage() {
       });
       router.push('/account');
     } catch (error: any) {
-      toast({
-        title: "Signup Failed",
-        description: error.message,
-        variant: "destructive",
-      });
+       if (error.message.includes("already exists")) {
+            toast({
+                title: "Account Exists",
+                description: "An account with this email already exists. Please log in.",
+                variant: "destructive",
+            });
+            router.push('/login');
+        } else {
+            toast({
+                title: "Signup Failed",
+                description: error.message,
+                variant: "destructive",
+            });
+        }
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
-      toast({ title: "Account Created!", description: "Welcome to VRIDHIRA!" });
+      toast({ title: "Login Successful", description: "Welcome back!" });
       router.push('/account');
     } catch (error: any) {
-      toast({ title: "Signup Failed", description: error.message, variant: "destructive" });
+      toast({ title: "Login Failed", description: error.message, variant: "destructive" });
     }
   };
 
@@ -75,7 +84,7 @@ export default function SignupPage() {
           <CardContent>
             <div className="space-y-4">
                <Button variant="outline" className="w-full h-11 text-sm font-medium" onClick={handleGoogleSignIn}>
-                <Chrome className="mr-2 h-5 w-5" /> Continue with Google
+                <Chrome className="mr-2 h-5 w-5" /> Sign up with Google
               </Button>
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">

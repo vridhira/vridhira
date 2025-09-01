@@ -14,9 +14,10 @@ import {
   updateProfile,
   signInWithCredential,
   EmailAuthProvider,
+  PhoneAuthProvider,
 } from 'firebase/auth';
 import { auth as firebaseAuth } from '@/lib/firebase';
-import { createUser, findUserByEmail } from '@/lib/user-actions';
+import { createUser, findUserByEmail, findUserByPhoneNumber } from '@/lib/user-actions';
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -58,22 +59,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
   const signup = async (email: string, password: string, firstName: string, lastName: string) => {
-    try {
-      const existingUser = await findUserByEmail(email);
-      if (existingUser) {
-        throw new Error("An account with this email already exists.");
-      }
-
-      const newUser = await createUser({ email, password, firstName, lastName });
-      
-      const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-      await updateProfile(userCredential.user, { displayName: `${firstName} ${lastName}` });
-
-      return userCredential.user;
-    } catch (error) {
-      console.error("Error signing up:", error);
-      throw error;
+    const existingUser = await findUserByEmail(email);
+    if (existingUser) {
+      throw new Error("An account with this email already exists.");
     }
+    
+    const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+    await updateProfile(userCredential.user, { displayName: `${firstName} ${lastName}` });
+    
+    await createUser({ id: userCredential.user.uid, email, password, firstName, lastName });
+    
+    return userCredential.user;
   };
 
   const logout = async () => {
@@ -86,46 +82,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(firebaseAuth, provider);
-      
-      const email = result.user.email;
-      if (!email) {
-          throw new Error("Could not retrieve email from Google Sign-In.");
-      }
-
-      let existingUser = await findUserByEmail(email);
-      if (!existingUser) {
-        const nameParts = result.user.displayName?.split(' ') || [''];
-        const firstName = nameParts[0];
-        const lastName = nameParts.slice(1).join(' ');
-        await createUser({ id: result.user.uid, email, firstName, lastName });
-      }
-      return result.user;
-    } catch (error) {
-      console.error("Error signing in with Google:", error);
-      throw error;
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(firebaseAuth, provider);
+    
+    const email = result.user.email;
+    if (!email) {
+        throw new Error("Could not retrieve email from Google Sign-In.");
     }
+
+    let existingUser = await findUserByEmail(email);
+    if (!existingUser) {
+      const nameParts = result.user.displayName?.split(' ') || [''];
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ');
+      await createUser({ id: result.user.uid, email, firstName, lastName });
+    }
+    return result.user;
   };
 
   const signInWithPhoneNumber = async (phoneNumber: string, recaptchaContainerId: string) => {
-    try {
-        const recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, recaptchaContainerId, {
-        'size': 'invisible',
-        'callback': () => {},
-        'expired-callback': () => {}
-      });
-      const confirmationResult = await signInWithPhoneNumber(firebaseAuth, phoneNumber, recaptchaVerifier);
-      return confirmationResult.verificationId;
-    } catch (error) {
-      console.error("Error sending phone number verification:", error);
-      throw error;
+    const existingUser = await findUserByPhoneNumber(phoneNumber);
+    if (existingUser) {
+        throw new Error("An account with this phone number already exists.");
     }
+    const recaptchaVerifier = new RecaptchaVerifier(firebaseAuth, recaptchaContainerId, {
+    'size': 'invisible',
+    'callback': () => {},
+    'expired-callback': () => {}
+    });
+    const confirmationResult = await signInWithPhoneNumber(firebaseAuth, phoneNumber, recaptchaVerifier);
+    return confirmationResult.verificationId;
   };
 
   const confirmPhoneNumberOtp = async (verificationId: string, otp: string) => {
-     throw new Error("Phone number OTP confirmation is not fully implemented yet.");
+     const credential = PhoneAuthProvider.credential(verificationId, otp);
+     const result = await signInWithCredential(firebaseAuth, credential);
+     
+     if (!result.user.phoneNumber) {
+        throw new Error("Could not retrieve phone number from Firebase.");
+     }
+
+     let existingUser = await findUserByPhoneNumber(result.user.phoneNumber);
+     if (!existingUser) {
+        const name = result.user.displayName || "New User";
+        const [firstName, ...lastNameParts] = name.split(' ');
+        await createUser({ 
+            id: result.user.uid,
+            phoneNumber: result.user.phoneNumber,
+            firstName,
+            lastName: lastNameParts.join(' ') || ' '
+        });
+     }
+
+     return result.user;
   };
 
   return (
