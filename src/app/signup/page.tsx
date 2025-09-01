@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { UserPlus } from 'lucide-react';
+import { Chrome, UserPlus } from 'lucide-react';
 
 const signupSchema = z.object({
   firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
@@ -21,7 +21,7 @@ const signupSchema = z.object({
 });
 
 export default function SignupPage() {
-  const { signup } = useAuth();
+  const { signup, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -52,6 +52,16 @@ export default function SignupPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      toast({ title: "Account Created!", description: "Welcome to VRIDHIRA!" });
+      router.push('/account');
+    } catch (error: any) {
+      toast({ title: "Signup Failed", description: error.message, variant: "destructive" });
+    }
+  };
+
   return (
     <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
@@ -63,8 +73,21 @@ export default function SignupPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="space-y-4">
+               <Button variant="outline" className="w-full h-11 text-sm font-medium" onClick={handleGoogleSignIn}>
+                <Chrome className="mr-2 h-5 w-5" /> Continue with Google
+              </Button>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">Or sign up with email</span>
+                </div>
+              </div>
+            </div>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
                 <div className="grid grid-cols-2 gap-4">
                     <FormField
                     control={form.control}
