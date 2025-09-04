@@ -54,6 +54,18 @@ export function Header() {
     }
     
     if (session) {
+      const userRole = session.user?.role;
+      const canAccessDashboard = userRole === 'owner' || userRole === 'admin' || userRole === 'shopkeeper';
+      
+      const getDashboardLabel = () => {
+        switch(userRole) {
+            case 'owner': return 'Owner Dashboard';
+            case 'admin': return 'Admin Dashboard';
+            case 'shopkeeper': return 'Shop Dashboard';
+            default: return 'Dashboard';
+        }
+      }
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -78,11 +90,11 @@ export function Header() {
                 My Account
               </DropdownMenuItem>
             </Link>
-             {session.user?.role === 'owner' && (
+             {canAccessDashboard && (
                 <Link href="/dashboard" passHref>
                     <DropdownMenuItem>
                         <LayoutDashboard className="mr-2" />
-                        Owner Dashboard
+                        {getDashboardLabel()}
                     </DropdownMenuItem>
                 </Link>
              )}
