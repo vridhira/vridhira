@@ -24,7 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, CreditCard, MapPin, Heart, Star, LogOut, Shield } from 'lucide-react';
+import { User, CreditCard, MapPin, Heart, Star, LogOut, Shield, Trash2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 type AccountSection = 'profile' | 'orders' | 'addresses' | 'payment' | 'wishlist' | 'reviews' | 'security';
