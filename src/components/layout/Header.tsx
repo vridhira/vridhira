@@ -54,6 +54,7 @@ export function Header() {
     }
     
     if (session) {
+      // @ts-ignore
       const userRole = session.user?.role;
       const canAccessDashboard = userRole === 'owner' || userRole === 'admin' || userRole === 'shopkeeper';
       
