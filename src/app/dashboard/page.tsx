@@ -10,23 +10,26 @@ import { getAllUsers, handleRoleChange, findUserById } from '@/lib/user-actions'
 import { UserManagementTable } from '@/components/dashboard/UserManagementTable';
 import { UserList } from '@/components/dashboard/UserList';
 import { UpsertUserDialog } from '@/components/dashboard/UpsertUserDialog';
-import { getProductsByArtisan, products as allProducts } from '@/lib/data';
+import { getProductsByArtisan } from '@/lib/product-actions';
 import { ProductManagementTable } from '@/components/dashboard/ProductManagementTable';
 import { AddProductDialog } from '@/components/dashboard/AddProductDialog';
+import { products as allProducts } from '@/lib/data';
 
 
 export default async function DashboardPage() {
   const session = await auth();
   const user = session?.user;
 
+  // Security check: Only owners, admins, and shopkeepers can access the dashboard.
   if (!user || !user.id || !user.role || !['owner', 'admin', 'shopkeeper'].includes(user.role)) {
-    redirect('/');
+    redirect('/account'); // Regular users are sent to their account page.
   }
   
   // We need to fetch the full, most up-to-date user object from our database
   // to ensure the role is current and not from a stale session.
   const currentActor = await findUserById(user.id);
   
+  // Extra security check in case the user was deleted or their role was changed to 'user'.
   if (!currentActor || !['owner', 'admin', 'shopkeeper'].includes(currentActor.role)) {
        redirect('/');
   }
@@ -35,6 +38,7 @@ export default async function DashboardPage() {
   const isAdmin = currentActor.role === 'admin';
   const isShopkeeper = currentActor.role === 'shopkeeper';
   
+  // --- Shopkeeper Dashboard View ---
   if (isShopkeeper) {
       const shopProducts = await getProductsByArtisan(currentActor.id);
       return (
@@ -59,7 +63,7 @@ export default async function DashboardPage() {
       )
   }
 
-  // Owner and Admin view
+  // --- Owner and Admin Dashboard View ---
   const users = await getAllUsers();
   const shopkeepers = users.filter(u => u.role === 'shopkeeper');
   const admins = users.filter(u => u.role === 'admin');
@@ -76,7 +80,6 @@ export default async function DashboardPage() {
           <TabsTrigger value="users">All Users</TabsTrigger>
           <TabsTrigger value="shopkeepers">Shopkeepers</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
-
           {isOwner && <TabsTrigger value="admins">Admins</TabsTrigger>}
         </TabsList>
 
