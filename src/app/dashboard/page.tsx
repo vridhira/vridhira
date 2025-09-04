@@ -55,7 +55,7 @@ export default async function DashboardPage() {
               <CardHeader>
                 <CardTitle>Shopkeeper Management</CardTitle>
                 <CardDescription>All users with the 'shopkeeper' role.</CardDescription>
-              </Header>
+              </CardHeader>
               <CardContent>
                   <UserList users={shopkeepers} />
               </CardContent>
@@ -67,7 +67,7 @@ export default async function DashboardPage() {
               <CardHeader>
                 <CardTitle>Product Management</CardTitle>
                 <CardDescription>Manage all products in the marketplace.</CardDescription>
-              </Header>
+              </CardHeader>
               <CardContent>
                   <p className="text-muted-foreground text-center py-10">Product management UI coming soon.</p>
               </CardContent>
@@ -79,7 +79,7 @@ export default async function DashboardPage() {
               <CardHeader>
                 <CardTitle>Admin Management</CardTitle>
                 <CardDescription>All users with the 'admin' role. Owners can promote or demote admins.</CardDescription>
-              </Header>
+              </CardHeader>
               <CardContent>
                   <UserList users={admins} />
               </CardContent>
