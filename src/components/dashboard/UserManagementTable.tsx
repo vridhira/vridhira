@@ -20,11 +20,12 @@ import { useRouter } from 'next/navigation';
 interface UserManagementTableProps {
   users: User[];
   onRoleChange: (userId: string, role: UserRole) => Promise<{ error?: string } | void>;
+  isOwner: boolean;
 }
 
 const ROLES: UserRole[] = ['user', 'shopkeeper', 'admin', 'owner'];
 
-export function UserManagementTable({ users, onRoleChange }: UserManagementTableProps) {
+export function UserManagementTable({ users, onRoleChange, isOwner }: UserManagementTableProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState<string | null>(null);
@@ -96,24 +97,30 @@ export function UserManagementTable({ users, onRoleChange }: UserManagementTable
               <Badge variant={getRoleBadgeVariant(user.role)}>{user.role}</Badge>
             </TableCell>
             <TableCell className="text-right">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" disabled={!!isSubmitting}>
+              {isOwner ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" disabled={!!isSubmitting}>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {ROLES.map((role) => (
+                      <DropdownMenuItem
+                        key={role}
+                        onClick={() => handleRoleSelect(user.id, role)}
+                        disabled={user.role === role || !!isSubmitting || role === 'owner'}
+                      >
+                        Promote to {role.charAt(0).toUpperCase() + role.slice(1)}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                 <Button variant="ghost" size="icon" disabled>
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {ROLES.map((role) => (
-                    <DropdownMenuItem
-                      key={role}
-                      onClick={() => handleRoleSelect(user.id, role)}
-                      disabled={user.role === role || !!isSubmitting}
-                    >
-                      Promote to {role.charAt(0).toUpperCase() + role.slice(1)}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              )}
             </TableCell>
           </TableRow>
         ))}

@@ -11,10 +11,13 @@ import { UserList } from '@/components/dashboard/UserList';
 
 export default async function DashboardPage() {
   const session = await auth();
+  const userRole = session?.user?.role;
 
-  if (session?.user?.role !== 'owner') {
+  if (userRole !== 'owner' && userRole !== 'admin') {
     redirect('/');
   }
+
+  const isOwner = userRole === 'owner';
 
   const users = await getAllUsers();
   const shopkeepers = users.filter(user => user.role === 'shopkeeper');
@@ -23,7 +26,7 @@ export default async function DashboardPage() {
   return (
     <div className="container mx-auto py-12">
       <header className="mb-10">
-        <h1 className="text-4xl font-headline tracking-tight">Owner Dashboard</h1>
+        <h1 className="text-4xl font-headline tracking-tight">Marketplace Dashboard</h1>
         <p className="text-muted-foreground mt-2">Manage your entire marketplace from one place.</p>
       </header>
 
@@ -42,7 +45,7 @@ export default async function DashboardPage() {
               <CardDescription>View, manage, and assign roles to all users in the system.</CardDescription>
             </CardHeader>
             <CardContent>
-                <UserManagementTable users={users} onRoleChange={handleRoleChange} />
+                <UserManagementTable users={users} onRoleChange={handleRoleChange} isOwner={isOwner} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -52,7 +55,7 @@ export default async function DashboardPage() {
               <CardHeader>
                 <CardTitle>Shopkeeper Management</CardTitle>
                 <CardDescription>All users with the 'shopkeeper' role.</CardDescription>
-              </CardHeader>
+              </Header>
               <CardContent>
                   <UserList users={shopkeepers} />
               </CardContent>
@@ -64,7 +67,7 @@ export default async function DashboardPage() {
               <CardHeader>
                 <CardTitle>Product Management</CardTitle>
                 <CardDescription>Manage all products in the marketplace.</CardDescription>
-              </CardHeader>
+              </Header>
               <CardContent>
                   <p className="text-muted-foreground text-center py-10">Product management UI coming soon.</p>
               </CardContent>
@@ -76,7 +79,7 @@ export default async function DashboardPage() {
               <CardHeader>
                 <CardTitle>Admin Management</CardTitle>
                 <CardDescription>All users with the 'admin' role. Owners can promote or demote admins.</CardDescription>
-              </CardHeader>
+              </Header>
               <CardContent>
                   <UserList users={admins} />
               </CardContent>
