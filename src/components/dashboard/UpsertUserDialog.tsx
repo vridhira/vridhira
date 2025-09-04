@@ -33,20 +33,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { createUserFromDashboard } from '@/lib/user-actions';
+import { upsertUserFromDashboard } from '@/lib/user-actions';
 import { UserPlus } from 'lucide-react';
 
 const userSchema = z.object({
   firstName: z.string().min(2, { message: 'First name is required.' }),
   lastName: z.string().min(2, { message: 'Last name is required.' }),
   email: z.string().email({ message: 'A valid email is required.' }),
-  password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
+  password: z.string().min(8, { message: 'Password must be at least 8 characters.' }).optional().or(z.literal('')),
   role: z.enum(['user', 'shopkeeper'], {
     required_error: 'Please select a role.',
   }),
 });
 
-export function AddUserDialog() {
+export function UpsertUserDialog() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const form = useForm<z.infer<typeof userSchema>>({
@@ -62,19 +62,23 @@ export function AddUserDialog() {
 
   const onSubmit = async (values: z.infer<typeof userSchema>) => {
     try {
-      const result = await createUserFromDashboard(values);
+      const result = await upsertUserFromDashboard(values);
+
       if (result?.error) {
         throw new Error(result.error);
       }
+      
       toast({
-        title: 'User Created',
-        description: `An account for ${values.email} has been successfully created.`,
+        title: result.operation === 'created' ? 'User Created' : 'User Updated',
+        description: `An account for ${values.email} has been successfully ${result.operation}.`,
       });
+
       form.reset();
       setOpen(false);
+
     } catch (error: any) {
       toast({
-        title: 'Error Creating User',
+        title: 'Error',
         description: error.message,
         variant: 'destructive',
       });
@@ -85,15 +89,14 @@ export function AddUserDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <UserPlus className="mr-2 h-4 w-4" /> Add User
+          <UserPlus className="mr-2 h-4 w-4" /> Add / Update User
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New User</DialogTitle>
+          <DialogTitle>Add or Update User</DialogTitle>
           <DialogDescription>
-            Enter the details below to create a new user account. They will be
-            able to log in with these credentials immediately.
+            Enter user details. If the email exists, the user will be updated. Otherwise, a new user will be created.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -145,8 +148,8 @@ export function AddUserDialog() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                   <FormControl>
+                    <Input type="password" placeholder="•••••••• (leave blank to keep existing)" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -180,7 +183,7 @@ export function AddUserDialog() {
                 </Button>
               </DialogClose>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Creating...' : 'Create User'}
+                {form.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
             </DialogFooter>
           </form>

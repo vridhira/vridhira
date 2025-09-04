@@ -191,36 +191,55 @@ export const handleRoleChange = async (userId: string, role: UserRole) => {
   };
 
 
-  type CreateUserDashboardData = Omit<User, 'id' | 'isVerified' | 'createdAt'>;
+  type UpsertUserDashboardData = Omit<User, 'id' | 'isVerified' | 'createdAt'>;
 
-  export const createUserFromDashboard = async (data: CreateUserDashboardData) => {
+  export const upsertUserFromDashboard = async (data: UpsertUserDashboardData) => {
     'use server';
     try {
-      const users = readUsers();
-      const existingUser = users.find(u => u.email === data.email);
-      if (existingUser) {
-        return { error: 'A user with this email already exists.' };
-      }
-  
-      const hashedPassword = await bcrypt.hash(data.password, 10);
-  
-      const newUser: User = {
-        id: Date.now().toString(),
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: hashedPassword,
-        role: data.role,
-        isVerified: true, // Manually created users are verified by default
-        createdAt: new Date().toISOString(),
-      };
-  
-      users.push(newUser);
-      writeUsers(users);
-  
-      revalidatePath('/dashboard');
+        const users = readUsers();
+        const userIndex = users.findIndex(u => u.email === data.email);
+
+        if (userIndex !== -1) {
+            // Update existing user
+            users[userIndex] = {
+                ...users[userIndex],
+                firstName: data.firstName,
+                lastName: data.lastName,
+                role: data.role,
+            };
+            if (data.password) {
+                const hashedPassword = await bcrypt.hash(data.password, 10);
+                users[userIndex].password = hashedPassword;
+            }
+            writeUsers(users);
+            revalidatePath('/dashboard');
+            return { operation: 'updated' };
+        } else {
+            // Create new user
+            if (!data.password) {
+                return { error: 'A password is required for new users.' };
+            }
+            const hashedPassword = await bcrypt.hash(data.password, 10);
+      
+            const newUser: User = {
+              id: Date.now().toString(),
+              firstName: data.firstName,
+              lastName: data.lastName,
+              email: data.email,
+              password: hashedPassword,
+              role: data.role,
+              isVerified: true, // Manually created users are verified by default
+              createdAt: new Date().toISOString(),
+            };
+        
+            users.push(newUser);
+            writeUsers(users);
+        
+            revalidatePath('/dashboard');
+            return { operation: 'created' };
+        }
     } catch (error: any) {
-      console.error("Error creating user from dashboard:", error);
+      console.error("Error upserting user from dashboard:", error);
       return { error: error.message || 'An unexpected error occurred.' };
     }
   };
