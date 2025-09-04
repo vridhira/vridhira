@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getAllUsers, handleRoleChange } from '@/lib/user-actions';
 import { UserManagementTable } from '@/components/dashboard/UserManagementTable';
+import { UserList } from '@/components/dashboard/UserList';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -16,6 +17,8 @@ export default async function DashboardPage() {
   }
 
   const users = await getAllUsers();
+  const shopkeepers = users.filter(user => user.role === 'shopkeeper');
+  const admins = users.filter(user => user.role === 'admin');
   
   return (
     <div className="container mx-auto py-12">
@@ -26,10 +29,10 @@ export default async function DashboardPage() {
 
       <Tabs defaultValue="users">
         <TabsList className="grid w-full grid-cols-4 mb-6">
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="shopkeepers" disabled>Shopkeepers</TabsTrigger>
-          <TabsTrigger value="products" disabled>Products</TabsTrigger>
-          <TabsTrigger value="admins" disabled>Admins</TabsTrigger>
+          <TabsTrigger value="users">All Users</TabsTrigger>
+          <TabsTrigger value="shopkeepers">Shopkeepers</TabsTrigger>
+          <TabsTrigger value="products">Products</TabsTrigger>
+          <TabsTrigger value="admins">Admins</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -44,15 +47,40 @@ export default async function DashboardPage() {
           </Card>
         </TabsContent>
         
-        {/* Placeholder for other tabs */}
         <TabsContent value="shopkeepers">
-            {/* Shopkeeper management table will go here */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Shopkeeper Management</CardTitle>
+                <CardDescription>All users with the 'shopkeeper' role.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <UserList users={shopkeepers} />
+              </CardContent>
+            </Card>
         </TabsContent>
+
          <TabsContent value="products">
-            {/* Product management table will go here */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Management</CardTitle>
+                <CardDescription>Manage all products in the marketplace.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <p className="text-muted-foreground text-center py-10">Product management UI coming soon.</p>
+              </CardContent>
+            </Card>
         </TabsContent>
+
          <TabsContent value="admins">
-            {/* Admin management table will go here */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Admin Management</CardTitle>
+                <CardDescription>All users with the 'admin' role. Owners can promote or demote admins.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <UserList users={admins} />
+              </CardContent>
+            </Card>
         </TabsContent>
 
       </Tabs>
