@@ -6,5 +6,13 @@
     "email": "kumaraloke23@gmail.com",
     "phoneNumber": "+919911459716",
     "password": "$2b$10$q5Z/cU8kNBVBGcUJDWi/wOHp.LfI9KXbWrZNfvnCqRzhgNiC5VNWu"
+  },
+  {
+    "id": "101326878748707276296",
+    "firstName": "Himanshu",
+    "lastName": "Shroff",
+    "email": "hk8913114@gmail.com",
+    "image": "https://lh3.googleusercontent.com/a/ACg8ocKdKYHFFn069yQDWblIy8GnLyI5IdmVaOm-MeG-BReSdnFA_L4H=s96-c",
+    "createdAt": "2025-09-01T11:41:57.013Z"
   }
 ]
