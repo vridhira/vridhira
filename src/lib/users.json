@@ -1,3 +1,4 @@
+
 [
   {
     "id": "1756721694952",
@@ -29,5 +30,35 @@
     "createdAt": "2025-09-04T04:33:28.022Z",
     "role": "user",
     "isVerified": true
+  },
+  {
+    "id": "artisan-1",
+    "firstName": "Ramesh",
+    "lastName": "Kumar",
+    "email": "ramesh.kumar@vridhira.com",
+    "password": "$2a$10$GNa3gJ.G9g4QzPqjEaB7W.L4.F8Hw.YcXeIrF6eL/3nBvJ7bQe2vO",
+    "role": "shopkeeper",
+    "isVerified": true,
+    "createdAt": "2024-09-07T10:00:00.000Z"
+  },
+  {
+    "id": "artisan-2",
+    "firstName": "Sita",
+    "lastName": "Devi",
+    "email": "sita.devi@vridhira.com",
+    "password": "$2a$10$vKlE5n/Tq/C8N.d/T/T8n.y9q.Z8i.j/y8w.U9z.q/w5P2eUuV6oG",
+    "role": "shopkeeper",
+    "isVerified": true,
+    "createdAt": "2024-09-07T10:01:00.000Z"
+  },
+  {
+    "id": "artisan-3",
+    "firstName": "Karthik",
+    "lastName": "Reddy",
+    "email": "karthik.reddy@vridhira.com",
+    "password": "$2a$10$fJt9GZzYq.8d/P6a.C8uI.N2m.z/S9o.Z9l/k7k.w/u.R4l/oP6p.",
+    "role": "shopkeeper",
+    "isVerified": true,
+    "createdAt": "2024-09-07T10:02:00.000Z"
   }
 ]

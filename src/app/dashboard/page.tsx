@@ -11,6 +11,8 @@ import { UserList } from '@/components/dashboard/UserList';
 import { UpsertUserDialog } from '@/components/dashboard/UpsertUserDialog';
 import { products } from '@/lib/data';
 import { ProductManagementTable } from '@/components/dashboard/ProductManagementTable';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -70,9 +72,15 @@ export default async function DashboardPage() {
 
          <TabsContent value="products">
             <Card>
-              <CardHeader>
-                <CardTitle>Product Management</CardTitle>
-                <CardDescription>View and manage all products in the marketplace.</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                 <div>
+                    <CardTitle>Product Management</CardTitle>
+                    <CardDescription>View and manage all products in the marketplace.</CardDescription>
+                 </div>
+                 <Button disabled>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Product
+                </Button>
               </CardHeader>
               <CardContent>
                   <ProductManagementTable products={products} />
