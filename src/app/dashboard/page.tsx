@@ -10,10 +10,9 @@ import { getAllUsers, handleRoleChange, findUserById } from '@/lib/user-actions'
 import { UserManagementTable } from '@/components/dashboard/UserManagementTable';
 import { UserList } from '@/components/dashboard/UserList';
 import { UpsertUserDialog } from '@/components/dashboard/UpsertUserDialog';
-import { getProductsByArtisan } from '@/lib/product-actions';
+import { getProductsByArtisan, products as allProducts } from '@/lib/data';
 import { ProductManagementTable } from '@/components/dashboard/ProductManagementTable';
 import { AddProductDialog } from '@/components/dashboard/AddProductDialog';
-import { products as allProducts } from '@/lib/data';
 
 
 export default async function DashboardPage() {
