@@ -4,7 +4,7 @@
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcrypt';
-import { User } from './types';
+import { User, UserRole } from './types';
 
 // --- DEVELOPMENT ONLY --- //
 // This is a simple file-based user store for development purposes.
@@ -143,4 +143,23 @@ export const findOrCreateUser = async (profile: Partial<User>): Promise<User> =>
   
   // User does not exist, create a new one.
   return await createUser(profile);
+}
+
+export const getAllUsers = async (): Promise<User[]> => {
+    return readUsers();
+}
+
+export const updateUserRole = async (userId: string, role: UserRole): Promise<User> => {
+    const users = readUsers();
+    const userIndex = users.findIndex(u => u.id === userId);
+
+    if (userIndex === -1) {
+        throw new Error('User not found');
+    }
+
+    users[userIndex].role = role;
+    writeUsers(users);
+    
+    const { password, ...updatedUser } = users[userIndex];
+    return updatedUser;
 }

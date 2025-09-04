@@ -74,10 +74,18 @@ export function Header() {
             <DropdownMenuSeparator />
             <Link href="/account" passHref>
               <DropdownMenuItem>
-                <LayoutDashboard className="mr-2" />
-                Profile
+                <User className="mr-2" />
+                My Account
               </DropdownMenuItem>
             </Link>
+             {session.user?.role === 'owner' && (
+                <Link href="/dashboard" passHref>
+                    <DropdownMenuItem>
+                        <LayoutDashboard className="mr-2" />
+                        Owner Dashboard
+                    </DropdownMenuItem>
+                </Link>
+             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2" />
