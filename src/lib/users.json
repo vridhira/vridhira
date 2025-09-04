@@ -14,5 +14,14 @@
     "email": "hk8913114@gmail.com",
     "image": "https://lh3.googleusercontent.com/a/ACg8ocKdKYHFFn069yQDWblIy8GnLyI5IdmVaOm-MeG-BReSdnFA_L4H=s96-c",
     "createdAt": "2025-09-01T11:41:57.013Z"
+  },
+  {
+    "id": "1756960408022",
+    "firstName": "Swati",
+    "lastName": "Sharma",
+    "email": "swatisom.2007@gmail.com",
+    "phoneNumber": "+917042493416",
+    "password": "$2b$10$nLyzel/P47165ap0N/0nV.AN2CUUcYHCeG/.x6GgS3qY9WLT4ulR6",
+    "createdAt": "2025-09-04T04:33:28.022Z"
   }
 ]
