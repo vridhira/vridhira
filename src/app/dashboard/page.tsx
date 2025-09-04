@@ -9,6 +9,8 @@ import { getAllUsers, handleRoleChange } from '@/lib/user-actions';
 import { UserManagementTable } from '@/components/dashboard/UserManagementTable';
 import { UserList } from '@/components/dashboard/UserList';
 import { UpsertUserDialog } from '@/components/dashboard/UpsertUserDialog';
+import { products } from '@/lib/data';
+import { ProductManagementTable } from '@/components/dashboard/ProductManagementTable';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -46,7 +48,7 @@ export default async function DashboardPage() {
                 <CardTitle>User Management</CardTitle>
                 <CardDescription>View, manage, and assign roles to all users in the system.</CardDescription>
               </div>
-              <UpsertUserDialog />
+              {isOwner && <UpsertUserDialog />}
             </CardHeader>
             <CardContent>
                 <UserManagementTable users={users} onRoleChange={handleRoleChange} isOwner={isOwner} />
@@ -70,10 +72,10 @@ export default async function DashboardPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Product Management</CardTitle>
-                <CardDescription>Manage all products in the marketplace.</CardDescription>
+                <CardDescription>View and manage all products in the marketplace.</CardDescription>
               </CardHeader>
               <CardContent>
-                  <p className="text-muted-foreground text-center py-10">Product management UI coming soon.</p>
+                  <ProductManagementTable products={products} />
               </CardContent>
             </Card>
         </TabsContent>
