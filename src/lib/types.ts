@@ -16,6 +16,15 @@ export interface User {
   role: UserRole;
 }
 
+export interface Shop {
+  id: string;
+  ownerId: string; // Links to the User ID
+  name: string;
+  category: string;
+  createdAt: string;
+}
+
+
 export interface OtpAttempt {
     phoneNumber: string;
     count: number;
