@@ -1,4 +1,5 @@
 
+
 import NextAuth, { AuthError } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
@@ -17,6 +18,10 @@ class InvalidPasswordError extends AuthError {
 
 class MissingPasswordError extends AuthError {
     code = 'MissingPassword';
+}
+
+class NotVerifiedError extends AuthError {
+    code = 'NotVerified';
 }
 
 export const authConfig = {
@@ -53,6 +58,10 @@ export const authConfig = {
             if (!user) {
                 throw new UserNotFoundError("No user found with the provided credentials.");
             }
+            
+            if (!user.isVerified) {
+                throw new NotVerifiedError("Your email is not verified. Please check your inbox.");
+            }
 
             if (!user.password) {
                 throw new MissingPasswordError("This account does not have a password set. Try a social login.");
@@ -68,7 +77,7 @@ export const authConfig = {
             return userWithoutPassword;
 
         } catch (error) {
-            if (error instanceof UserNotFoundError || error instanceof InvalidPasswordError || error instanceof MissingPasswordError) {
+            if (error instanceof UserNotFoundError || error instanceof InvalidPasswordError || error instanceof MissingPasswordError || error instanceof NotVerifiedError) {
                 // Re-throw custom auth errors so NextAuth can handle them
                 throw error;
             }

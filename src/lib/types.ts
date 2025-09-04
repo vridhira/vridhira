@@ -1,4 +1,5 @@
 
+
 import { Product } from "./data";
 
 export type UserRole = 'user' | 'shopkeeper' | 'admin' | 'owner';
@@ -14,6 +15,7 @@ export interface User {
   name?: string;
   createdAt?: string;
   role: UserRole;
+  isVerified: boolean; // Added for email verification
 }
 
 export interface Shop {

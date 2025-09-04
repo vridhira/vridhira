@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { createUser } from '@/lib/user-actions';
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
         shopCategory
     } = body;
 
-    if (!firstName || !lastName || !email || !phoneNumber || !password || !shopName || !shopCategory) {
+    if (!firstName || !lastName || !email || !password || !shopName || !shopCategory) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
     
@@ -38,11 +39,14 @@ export async function POST(req: Request) {
         shopName: shopName,
         category: shopCategory,
     });
+    
+    // TODO: Send verification email here
 
     // Return the created user (without the password)
     return NextResponse.json(user, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: any)
+ {
     console.error("Vendor Signup API Error:", error);
     // Send back a specific error message if available (e.g., "User already exists")
     return NextResponse.json({ message: error.message || 'An unexpected error occurred.' }, { status: 500 });

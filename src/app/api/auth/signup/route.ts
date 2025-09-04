@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { createUser } from '@/lib/user-actions';
@@ -9,7 +10,8 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { firstName, lastName, email, phoneNumber, password } = body;
 
-    if (!firstName || !lastName || !email || !phoneNumber || !password) {
+    // Email and password are now the primary requirements
+    if (!firstName || !lastName || !email || !password) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
     
@@ -17,10 +19,12 @@ export async function POST(req: Request) {
       firstName,
       lastName,
       email,
-      phoneNumber,
+      phoneNumber, // This can be undefined or null
       password,
     });
     
+    // TODO: Send verification email here
+
     // Return the created user (without the password)
     return NextResponse.json(user, { status: 201 });
 

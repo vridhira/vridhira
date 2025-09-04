@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -13,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { UserPlus } from 'lucide-react';
-import { signIn, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,7 +27,7 @@ const signupSchema = z.object({
   firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
   lastName: z.string().min(2, { message: "Last name must be at least 2 characters." }),
   email: z.string().email({ message: "Invalid email address." }),
-  phoneNumber: z.string().refine(isValidPhoneNumber, { message: "Invalid phone number." }),
+  phoneNumber: z.string().refine(value => !value || isValidPhoneNumber(value), { message: "Invalid phone number." }).optional(),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
   shopName: z.string().min(3, { message: "Shop name must be at least 3 characters." }),
   shopCategory: z.string({ required_error: "Please select a shop category." }),
@@ -75,21 +76,10 @@ export default function VendorSignupPage() {
 
       toast({
         title: "Seller Account Created!",
-        description: "Welcome to the VRIDHIRA marketplace! You can now log in.",
+        description: "Please check your email to verify your account before logging in.",
       });
-
-       const result = await signIn('credentials', {
-          email: values.email,
-          password: values.password,
-          redirect: false,
-      });
-
-       if (result?.error) {
-        toast({ title: "Login Failed", description: "Automatic login failed, please try logging in manually.", variant: "destructive" });
-        router.push('/vendor/login');
-      } else {
-        router.push('/dashboard'); // Will be vendor dashboard
-      }
+      
+      router.push('/vendor/login');
 
     } catch (error: any) {
       toast({
@@ -197,7 +187,7 @@ export default function VendorSignupPage() {
                     name="phoneNumber"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
+                            <FormLabel>Phone Number (Optional)</FormLabel>
                             <FormControl>
                                 <PhoneInput
                                     international

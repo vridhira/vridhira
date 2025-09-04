@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import fs from 'fs';
@@ -60,6 +61,7 @@ export const createUser = async (userData: Partial<User>): Promise<User> => {
     }
   }
 
+  // Phone number is optional, but if provided, it must be unique.
   if (userData.phoneNumber) {
     const existingByPhone = users.find(u => u.phoneNumber === userData.phoneNumber);
     if(existingByPhone) {
@@ -93,7 +95,8 @@ export const createUser = async (userData: Partial<User>): Promise<User> => {
     password: hashedPassword,
     image: userData.image,
     createdAt: new Date().toISOString(),
-    role: 'user', // Assign default role
+    role: userData.role || 'user', // Assign role from data or default to 'user'
+    isVerified: !!userData.id, // Mark as verified if it's a social login (has profile.sub id)
   };
 
   users.push(newUser);
@@ -138,6 +141,16 @@ export const findOrCreateUser = async (profile: Partial<User>): Promise<User> =>
 
   const existingUser = await findUserByEmail(profile.email);
   if (existingUser) {
+    // If user exists, ensure they are marked as verified
+    if (!existingUser.isVerified) {
+        const users = readUsers();
+        const userIndex = users.findIndex(u => u.id === existingUser.id);
+        if (userIndex !== -1) {
+            users[userIndex].isVerified = true;
+            writeUsers(users);
+        }
+        existingUser.isVerified = true;
+    }
     const { password, ...userWithoutPassword } = existingUser;
     return userWithoutPassword;
   }

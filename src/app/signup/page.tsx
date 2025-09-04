@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -23,7 +24,7 @@ const signupSchema = z.object({
   firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
   lastName: z.string().min(2, { message: "Last name must be at least 2 characters." }),
   email: z.string().email({ message: "Invalid email address." }),
-  phoneNumber: z.string().refine(isValidPhoneNumber, { message: "Invalid phone number." }),
+  phoneNumber: z.string().refine(value => !value || isValidPhoneNumber(value), { message: "Invalid phone number." }).optional(),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
 });
 
@@ -70,21 +71,10 @@ export default function SignupPage() {
 
       toast({
         title: "Account Created!",
-        description: "You have been successfully signed up. Welcome to VRIDHIRA!",
+        description: "Please check your email to verify your account before logging in.",
       });
+      router.push('/login');
 
-      const result = await signIn('credentials', {
-          email: values.email,
-          password: values.password,
-          redirect: false,
-      });
-
-      if (result?.error) {
-        toast({ title: "Login Failed", description: "Automatic login failed, please try logging in manually.", variant: "destructive" });
-        router.push('/login');
-      } else {
-        router.push('/');
-      }
     } catch (error: any) {
       toast({
           title: "Signup Failed",
@@ -200,7 +190,7 @@ export default function SignupPage() {
                     name="phoneNumber"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
+                            <FormLabel>Phone Number (Optional)</FormLabel>
                             <FormControl>
                                 <PhoneInput
                                     international
