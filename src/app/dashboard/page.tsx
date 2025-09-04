@@ -102,7 +102,7 @@ export default async function DashboardPage() {
                 <CardDescription>All users with the 'shopkeeper' role.</CardDescription>
               </CardHeader>
               <CardContent>
-                  <UserList users={shopkeepers} />
+                  <UserList users={shopkeepers} currentActor={currentActor} />
               </CardContent>
             </Card>
         </TabsContent>
@@ -130,7 +130,7 @@ export default async function DashboardPage() {
                 <CardDescription>All users with the 'admin' role. Only owners can promote or demote admins.</CardDescription>
               </CardHeader>
               <CardContent>
-                  <UserList users={admins} />
+                  <UserList users={admins} currentActor={currentActor} />
               </CardContent>
             </Card>
         </TabsContent>
