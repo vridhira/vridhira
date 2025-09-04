@@ -136,7 +136,7 @@ export default function AccountPage() {
                           <AlertDialogDescription>
                             This action cannot be undone. This will permanently delete your
                             account and remove your data from our servers.
-                          </AlertDialogDescription>
+                          </Description>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -184,7 +184,7 @@ export default function AccountPage() {
                                     ) : orders.length > 0 ? (
                                         orders.map((order) => (
                                             <TableRow key={order.id}>
-                                                <TableCell className="font-medium">{order.id}</TableCell>
+                                                <TableCell className="font-medium">{order.id.substring(0, 7)}...</TableCell>
                                                 <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
                                                 <TableCell><Badge variant={getStatusBadgeVariant(order.status)}>{order.status}</Badge></TableCell>
                                                 <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
@@ -232,8 +232,7 @@ export default function AccountPage() {
                  <TabsContent value="reviews" className="mt-6">
                      <Card>
                         <CardHeader>
-                            <CardTitle>My Reviews</CardTitle>
-                            <CardDescription>Product reviews you have submitted.</CardDescription>
+                            <CardTitle>My Reviews</CardTitle>                            <CardDescription>Product reviews you have submitted.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <p className="text-sm text-muted-foreground text-center py-10">You have not submitted any reviews.</p>

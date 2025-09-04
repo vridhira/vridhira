@@ -1,3 +1,4 @@
+
 import { User } from './types';
 
 // --- MOCK DATA --- //
@@ -168,7 +169,7 @@ const mockUsers: User[] = [
 const orders: Order[] = [
     {
         id: 'ORD-001',
-        userId: 'user-1',
+        userId: '1756721694952', // alok singh
         date: '2023-10-26',
         status: 'Delivered',
         total: 70.00,
@@ -179,7 +180,7 @@ const orders: Order[] = [
     },
     {
         id: 'ORD-002',
-        userId: 'user-1',
+        userId: '1756721694952', // alok singh
         date: '2023-11-05',
         status: 'Shipped',
         total: 90.00,
@@ -190,20 +191,29 @@ const orders: Order[] = [
     },
     {
         id: 'ORD-003',
-        userId: 'user-2',
+        userId: '101326878748707276296', // Himanshu Shroff
         date: '2023-11-12',
         status: 'Processing',
         total: 35.00,
         items: [
             { productId: '5', name: 'Embroidered Cushion Cover', quantity: 1, price: 35.00 },
         ],
+    },
+    {
+        id: 'ORD-004',
+        userId: '101326878748707276296', // Himanshu Shroff
+        date: '2023-11-15',
+        status: 'Cancelled',
+        total: 60.00,
+        items: [
+            { productId: '6', name: 'Handmade Wooden Spice Box', quantity: 1, price: 60.00 },
+        ],
     }
 ];
 
 // In a real app, this would fetch from a database
 export async function getOrdersByUserId(userId: string): Promise<Order[]> {
-    // This is a mock implementation. It ignores the userId and returns all orders for 'user-1'
-    // for demonstration purposes. In a real scenario, you would filter orders based on the userId.
-    const userOrders = orders.filter(order => order.userId === 'user-1');
+    // This is a mock implementation. It filters orders based on the userId.
+    const userOrders = orders.filter(order => order.userId === userId);
     return Promise.resolve(userOrders);
 }
