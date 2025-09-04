@@ -21,16 +21,10 @@ export default async function DashboardPage() {
   
   const handleRoleChange = async (userId: string, role: UserRole) => {
     'use server';
-    // You might want to add extra checks here, e.g., an owner cannot be demoted by another owner.
-    // For now, it directly calls the update action.
     try {
       await updateUserRole(userId, role);
-      // Revalidate path or redirect to refresh data.
-      // For this server component, a page refresh would show the change.
-      // With client components, you'd re-fetch data.
     } catch (error) {
       console.error("Failed to update role:", error);
-      // Handle error display to the user
       return { error: 'Failed to update role.' };
     }
   };

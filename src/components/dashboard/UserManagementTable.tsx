@@ -27,10 +27,10 @@ const ROLES: UserRole[] = ['user', 'shopkeeper', 'admin', 'owner'];
 export function UserManagementTable({ users, onRoleChange }: UserManagementTableProps) {
   const { toast } = useToast();
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState<string | null>(null);
 
   const handleRoleSelect = async (userId: string, role: UserRole) => {
-    setIsSubmitting(true);
+    setIsSubmitting(userId);
     const result = await onRoleChange(userId, role);
     if (result?.error) {
       toast({
@@ -44,10 +44,9 @@ export function UserManagementTable({ users, onRoleChange }: UserManagementTable
         description: `User role has been updated to ${role}.`,
       });
       // Force a server-side data refresh by reloading the page.
-      // A more advanced implementation might use revalidatePath or a client-side state update.
       router.refresh(); 
     }
-    setIsSubmitting(false);
+    setIsSubmitting(null);
   };
   
   const getRoleBadgeVariant = (role: UserRole) => {
@@ -99,7 +98,7 @@ export function UserManagementTable({ users, onRoleChange }: UserManagementTable
             <TableCell className="text-right">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" disabled={isSubmitting}>
+                  <Button variant="ghost" size="icon" disabled={!!isSubmitting}>
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -108,7 +107,7 @@ export function UserManagementTable({ users, onRoleChange }: UserManagementTable
                     <DropdownMenuItem
                       key={role}
                       onClick={() => handleRoleSelect(user.id, role)}
-                      disabled={user.role === role || isSubmitting}
+                      disabled={user.role === role || !!isSubmitting}
                     >
                       Promote to {role.charAt(0).toUpperCase() + role.slice(1)}
                     </DropdownMenuItem>
