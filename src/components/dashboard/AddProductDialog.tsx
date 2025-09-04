@@ -47,7 +47,11 @@ const productSchema = z.object({
 
 const categoryNames = categories.map(c => c.name);
 
-export function AddProductDialog() {
+interface AddProductDialogProps {
+    artisanId: string;
+}
+
+export function AddProductDialog({ artisanId }: AddProductDialogProps) {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const form = useForm<z.infer<typeof productSchema>>({
@@ -61,7 +65,7 @@ export function AddProductDialog() {
 
   const onSubmit = async (values: z.infer<typeof productSchema>) => {
     try {
-      const result = await createProduct(values);
+      const result = await createProduct({ ...values, artisanId });
 
       if (result?.error) {
         throw new Error(result.error);

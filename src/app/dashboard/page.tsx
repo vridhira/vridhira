@@ -9,24 +9,53 @@ import { getAllUsers, handleRoleChange } from '@/lib/user-actions';
 import { UserManagementTable } from '@/components/dashboard/UserManagementTable';
 import { UserList } from '@/components/dashboard/UserList';
 import { UpsertUserDialog } from '@/components/dashboard/UpsertUserDialog';
-import { products } from '@/lib/data';
+import { getProductsByArtisan, products as allProducts } from '@/lib/data';
 import { ProductManagementTable } from '@/components/dashboard/ProductManagementTable';
 import { AddProductDialog } from '@/components/dashboard/AddProductDialog';
 
 
 export default async function DashboardPage() {
   const session = await auth();
-  const userRole = session?.user?.role;
+  const user = session?.user;
+  const userRole = user?.role;
 
-  if (userRole !== 'owner' && userRole !== 'admin') {
+  if (!user || !userRole || !['owner', 'admin', 'shopkeeper'].includes(userRole)) {
     redirect('/');
   }
 
   const isOwner = userRole === 'owner';
+  const isAdmin = userRole === 'admin';
+  const isShopkeeper = userRole === 'shopkeeper';
+  
+  // Conditionally render based on role
+  if (isShopkeeper) {
+      const shopProducts = await getProductsByArtisan(user.id);
+      return (
+        <div className="container mx-auto py-12">
+           <header className="mb-10">
+              <h1 className="text-4xl font-headline tracking-tight">My Shop Dashboard</h1>
+              <p className="text-muted-foreground mt-2">Manage your products and view your sales.</p>
+            </header>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                 <div>
+                    <CardTitle>My Products</CardTitle>
+                    <CardDescription>View, add, and manage the products in your shop.</CardDescription>
+                 </div>
+                 <AddProductDialog artisanId={user.id} />
+              </CardHeader>
+              <CardContent>
+                  <ProductManagementTable products={shopProducts} />
+              </CardContent>
+            </Card>
+        </div>
+      )
+  }
 
+  // Owner and Admin view
   const users = await getAllUsers();
-  const shopkeepers = users.filter(user => user.role === 'shopkeeper');
-  const admins = users.filter(user => user.role === 'admin');
+  const shopkeepers = users.filter(u => u.role === 'shopkeeper');
+  const admins = users.filter(u => u.role === 'admin');
   
   return (
     <div className="container mx-auto py-12">
@@ -77,10 +106,10 @@ export default async function DashboardPage() {
                     <CardTitle>Product Management</CardTitle>
                     <CardDescription>View and manage all products in the marketplace.</CardDescription>
                  </div>
-                 <AddProductDialog />
+                 <AddProductDialog artisanId={user.id} />
               </CardHeader>
               <CardContent>
-                  <ProductManagementTable products={products} />
+                  <ProductManagementTable products={allProducts} />
               </CardContent>
             </Card>
         </TabsContent>

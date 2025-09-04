@@ -1,4 +1,5 @@
 
+
 import { User } from './types';
 
 // --- MOCK DATA --- //
@@ -162,8 +163,8 @@ export const reviews: Review[] = [
 ];
 
 const mockUsers: User[] = [
-    { id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com' },
-    { id: 'user-2', firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com' },
+    { id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', role: 'user', isVerified: true },
+    { id: 'user-2', firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com', role: 'user', isVerified: true },
 ]
 
 const orders: Order[] = [
@@ -216,4 +217,9 @@ export async function getOrdersByUserId(userId: string): Promise<Order[]> {
     // This is a mock implementation. It filters orders based on the userId.
     const userOrders = orders.filter(order => order.userId === userId);
     return Promise.resolve(userOrders);
+}
+
+export async function getProductsByArtisan(artisanId: string): Promise<Product[]> {
+    const artisanProducts = products.filter(p => p.artisanId === artisanId);
+    return Promise.resolve(artisanProducts);
 }

@@ -5,23 +5,18 @@ import fs from 'fs';
 import path from 'path';
 import { revalidatePath } from 'next/cache';
 import { Product } from './data';
+import { auth } from '@/auth';
 
 const productsFilePath = path.join(process.cwd(), 'src', 'lib', 'products.json');
 
 const readProducts = (): Product[] => {
   try {
     if (!fs.existsSync(productsFilePath)) {
-      // If products.json doesn't exist, we can create it from the data.ts source
-      // This is a temporary measure for development. In a real app, this would be a database.
       const initialDataPath = path.join(process.cwd(), 'src', 'lib', 'data.ts');
-      // This is tricky because we can't just require a .ts file.
-      // For now, we'll just create an empty file if it doesn't exist.
-      // The real solution would be to move the mock data to a JSON file from the start.
       fs.writeFileSync(productsFilePath, JSON.stringify([]));
       return [];
     }
     const data = fs.readFileSync(productsFilePath, 'utf8');
-    // If the file is empty, return an empty array
     if (!data) return [];
     return JSON.parse(data);
   } catch (error) {
@@ -44,8 +39,6 @@ const initialSetup = () => {
     try {
         const products = readProducts();
         if (products.length === 0) {
-            // This is a workaround to get the initial data.
-            // In a real app, you would have a data migration script.
             const initialProducts: Product[] = [
               {
                 id: '1',
@@ -117,7 +110,7 @@ const initialSetup = () => {
             writeProducts(initialProducts);
         }
     } catch (e) {
-        // Silently fail setup, as it's not critical for every run
+        // Silently fail setup
     }
 };
 
@@ -129,6 +122,7 @@ type CreateProductData = {
   description: string;
   price: number;
   category: string;
+  artisanId: string;
 };
 
 export const createProduct = async (data: CreateProductData) => {
@@ -141,11 +135,11 @@ export const createProduct = async (data: CreateProductData) => {
       name: data.name,
       price: data.price,
       description: data.description,
-      images: ['https://picsum.photos/600/600?new-product'], // Placeholder image
+      images: ['https://picsum.photos/600/600?new-product'],
       category: data.category,
-      rating: 0, // New products start with 0 rating
+      rating: 0,
       reviewCount: 0,
-      artisanId: 'admin-added', // Or associate with the logged-in admin/shopkeeper
+      artisanId: data.artisanId,
     };
 
     products.push(newProduct);
@@ -159,4 +153,42 @@ export const createProduct = async (data: CreateProductData) => {
     console.error("Error creating product:", error);
     return { error: error.message || 'An unexpected error occurred.' };
   }
+};
+
+export const deleteProduct = async (productId: string) => {
+    'use server';
+    try {
+        const session = await auth();
+        const user = session?.user;
+
+        if (!user) {
+            return { error: 'You must be logged in to delete a product.' };
+        }
+
+        const products = readProducts();
+        const productIndex = products.findIndex(p => p.id === productId);
+
+        if (productIndex === -1) {
+            return { error: 'Product not found.' };
+        }
+
+        const productToDelete = products[productIndex];
+
+        // Check if the user is the owner of the product or an admin/owner of the site
+        if (user.role !== 'owner' && user.role !== 'admin' && productToDelete.artisanId !== user.id) {
+            return { error: 'You do not have permission to delete this product.' };
+        }
+
+        products.splice(productIndex, 1);
+        writeProducts(products);
+
+        revalidatePath('/dashboard');
+        revalidatePath('/products');
+
+        return { success: true };
+
+    } catch (error: any) {
+        console.error("Error deleting product:", error);
+        return { error: error.message || 'An unexpected error occurred.' };
+    }
 };
