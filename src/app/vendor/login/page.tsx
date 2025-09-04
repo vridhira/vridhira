@@ -30,7 +30,6 @@ export default function VendorLoginPage() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      // Redirect to a future vendor dashboard
       router.push('/dashboard'); 
     }
   }, [status, router]);
@@ -53,7 +52,7 @@ export default function VendorLoginPage() {
           toast({ title: "Login Failed", description: "Invalid credentials. Please check your email and password.", variant: "destructive" });
       } else if (result?.ok) {
           toast({ title: "Login Successful", description: "Welcome back, seller!" });
-          router.push('/dashboard'); // Will be vendor dashboard later
+          router.push('/dashboard'); 
       }
     } catch (error) {
         toast({ title: "Login Failed", description: "An unexpected error occurred. Please try again.", variant: "destructive" });

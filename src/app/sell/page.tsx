@@ -1,87 +1,106 @@
+
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { CheckCircle } from "lucide-react"
+import Link from "next/link";
+import Image from "next/image";
+import { CheckCircle, Store, Users, HandCoins } from "lucide-react";
 
 const benefits = [
-  "Reach a global audience of conscious consumers.",
-  "Earn fair prices for your incredible craftsmanship.",
-  "Receive support and training to grow your business.",
-  "Be part of a community dedicated to preserving Indian heritage."
+  { 
+    icon: <Store className="h-6 w-6 text-primary" />,
+    title: "Global Reach",
+    description: "Showcase your craft to a worldwide audience of conscious consumers." 
+  },
+  { 
+    icon: <HandCoins className="h-6 w-6 text-primary" />,
+    title: "Fair & Transparent",
+    description: "Earn fair prices for your craftsmanship with a clear and simple fee structure." 
+  },
+  { 
+    icon: <Users className="h-6 w-6 text-primary" />,
+    title: "Community & Support",
+    description: "Join a community dedicated to preserving heritage and growing together." 
+  },
 ]
 
 export default function SellPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    }
-  }, [status, router]);
-
-  if (status === 'loading') {
-    return <div className="container mx-auto py-16 md:py-24 text-center">Loading...</div>;
-  }
-
-  if (status === 'authenticated') {
-    return (
-      <div className="container mx-auto py-16 md:py-24">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-headline">Become a VRIDHIRA Artisan</h1>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Share your craft with the world and build a sustainable future for your art. Join our community of talented artisans today.
+  return (
+    <div className="bg-background">
+      {/* Hero Section */}
+      <section className="relative w-full py-20 md:py-32">
+         <div className="absolute inset-0 bg-primary/10 z-0" />
+         <div className="container mx-auto text-center z-10 relative">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-headline">Join the VRIDHIRA Artisan Marketplace</h1>
+            <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+              Turn your passion into a thriving business. Share your unique, handcrafted creations with the world.
             </p>
-            <div className="mt-8 space-y-4">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                  <span>{benefit}</span>
-                </div>
-              ))}
+            <div className="mt-8 flex justify-center gap-4">
+               <Button asChild size="lg">
+                 <Link href="/vendor/signup">Start Selling Now</Link>
+               </Button>
+               <Button asChild size="lg" variant="outline">
+                 <Link href="/vendor/login">Seller Login</Link>
+               </Button>
             </div>
-          </div>
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>Register Your Interest</CardTitle>
-              <CardDescription>Fill out the form below, and our team will get in touch with you.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" placeholder="Your Name" defaultValue={session.user?.name ?? ''} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" type="email" placeholder="you@example.com" defaultValue={session.user?.email ?? ''} />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="craft">Your Craft/Specialty</Label>
-                  <Input id="craft" placeholder="e.g., Pottery, Weaving, Woodwork" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="message">Tell Us About Yourself</Label>
-                  <Textarea id="message" placeholder="A brief introduction to you and your work." />
-                </div>
-                <Button type="submit" className="w-full">Register Now</Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
+         </div>
+      </section>
 
-  return null;
+      {/* Benefits Section */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto">
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold font-headline">Why Sell with VRIDHIRA?</h2>
+            <p className="mt-3 text-muted-foreground">
+              We provide the tools, support, and audience to help you succeed. Focus on your craft, and we'll handle the rest.
+            </p>
+          </div>
+          <div className="mt-12 grid md:grid-cols-3 gap-8 text-center">
+            {benefits.map((benefit, index) => (
+              <div key={index} className="p-6 rounded-lg">
+                <div className="flex justify-center items-center h-12 w-12 rounded-full bg-primary/10 mx-auto">
+                    {benefit.icon}
+                </div>
+                <h3 className="mt-5 text-xl font-semibold">{benefit.title}</h3>
+                <p className="mt-2 text-muted-foreground">{benefit.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      
+       {/* How it works Section */}
+        <section className="py-16 md:py-24 bg-muted">
+            <div className="container mx-auto">
+                <div className="text-center max-w-3xl mx-auto">
+                    <h2 className="text-3xl font-bold font-headline">Simple Steps to Start Selling</h2>
+                </div>
+                <div className="mt-12 grid md:grid-cols-3 gap-8 items-start">
+                     <div className="text-center">
+                        <div className="text-4xl font-bold text-primary mb-2">1.</div>
+                        <h3 className="text-xl font-semibold">Create Your Shop</h3>
+                        <p className="text-muted-foreground mt-2">Register as a seller and set up your personalized shop front. Tell your story and what makes your craft unique.</p>
+                    </div>
+                     <div className="text-center">
+                        <div className="text-4xl font-bold text-primary mb-2">2.</div>
+                        <h3 className="text-xl font-semibold">List Your Products</h3>
+                        <p className="text-muted-foreground mt-2">Upload high-quality photos and detailed descriptions of your handmade items through your seller dashboard.</p>
+                    </div>
+                     <div className="text-center">
+                        <div className="text-4xl font-bold text-primary mb-2">3.</div>
+                        <h3 className="text-xl font-semibold">Start Earning</h3>
+                        <p className="text-muted-foreground mt-2">Once a customer places an order, you ship the item directly. We handle the payment processing for you.</p>
+                    </div>
+                </div>
+                 <div className="text-center mt-12">
+                     <Button asChild size="lg">
+                        <Link href="/vendor/signup">Become a Seller Today</Link>
+                    </Button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+  )
 }
