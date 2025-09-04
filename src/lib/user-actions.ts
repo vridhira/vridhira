@@ -189,3 +189,38 @@ export const handleRoleChange = async (userId: string, role: UserRole) => {
       return { error: 'Failed to update role.' };
     }
   };
+
+
+  type CreateUserDashboardData = Omit<User, 'id' | 'isVerified' | 'createdAt'>;
+
+  export const createUserFromDashboard = async (data: CreateUserDashboardData) => {
+    'use server';
+    try {
+      const users = readUsers();
+      const existingUser = users.find(u => u.email === data.email);
+      if (existingUser) {
+        return { error: 'A user with this email already exists.' };
+      }
+  
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+  
+      const newUser: User = {
+        id: Date.now().toString(),
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: hashedPassword,
+        role: data.role,
+        isVerified: true, // Manually created users are verified by default
+        createdAt: new Date().toISOString(),
+      };
+  
+      users.push(newUser);
+      writeUsers(users);
+  
+      revalidatePath('/dashboard');
+    } catch (error: any) {
+      console.error("Error creating user from dashboard:", error);
+      return { error: error.message || 'An unexpected error occurred.' };
+    }
+  };

@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getAllUsers, handleRoleChange } from '@/lib/user-actions';
 import { UserManagementTable } from '@/components/dashboard/UserManagementTable';
 import { UserList } from '@/components/dashboard/UserList';
+import { AddUserDialog } from '@/components/dashboard/AddUserDialog';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -40,9 +41,12 @@ export default async function DashboardPage() {
 
         <TabsContent value="users">
           <Card>
-            <CardHeader>
-              <CardTitle>User Management</CardTitle>
-              <CardDescription>View, manage, and assign roles to all users in the system.</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>User Management</CardTitle>
+                <CardDescription>View, manage, and assign roles to all users in the system.</CardDescription>
+              </div>
+              <AddUserDialog />
             </CardHeader>
             <CardContent>
                 <UserManagementTable users={users} onRoleChange={handleRoleChange} isOwner={isOwner} />
