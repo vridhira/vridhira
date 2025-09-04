@@ -7,7 +7,7 @@ export type UserRole = 'user' | 'shopkeeper' | 'admin' | 'owner';
 export interface User {
   id: string;
   firstName: string;
-  lastName: string;
+  lastName:string;
   email: string | null;
   phoneNumber?: string | null;
   password?: string; // Can be optional for Google Sign-In
