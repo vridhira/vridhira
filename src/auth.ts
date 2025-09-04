@@ -107,12 +107,15 @@ export const authConfig = {
            token.email = dbUser.email;
            token.image = dbUser.image || user.image;
            token.createdAt = dbUser.createdAt;
+           token.role = dbUser.role; // Add role to token
         } else {
            // Fallback for initial user object from provider if db lookup fails
            token.id = user.id;
            token.name = user.name;
            token.email = user.email;
            token.image = user.image;
+           // @ts-ignore
+           token.role = user.role; // Add role to token
         }
       }
       return token;
@@ -125,6 +128,8 @@ export const authConfig = {
         session.user.image = token.image as string | undefined;
         // @ts-ignore
         session.user.createdAt = token.createdAt;
+        // @ts-ignore
+        session.user.role = token.role; // Add role to session
       }
       return session;
     },
