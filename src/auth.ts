@@ -106,7 +106,18 @@ export const authConfig = {
       }
       return true; // Allow sign-in
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
+        if (trigger === 'update' && session?.user) {
+            const updatedUser = session.user as User;
+            token.name = `${updatedUser.firstName} ${updatedUser.lastName}`;
+            token.role = updatedUser.role;
+            // @ts-ignore
+            token.addresses = updatedUser.addresses;
+             // @ts-ignore
+            token.paymentMethods = updatedUser.paymentMethods;
+            return token;
+        }
+
       if (user) {
         // This is the initial sign-in
         const dbUser = await findUserByEmail(user.email as string);
@@ -116,7 +127,11 @@ export const authConfig = {
            token.email = dbUser.email;
            token.image = dbUser.image || user.image;
            token.createdAt = dbUser.createdAt;
-           token.role = dbUser.role; // Add role to token
+           token.role = dbUser.role;
+           // @ts-ignore
+           token.addresses = dbUser.addresses;
+           // @ts-ignore
+           token.paymentMethods = dbUser.paymentMethods;
         } else {
            // Fallback for initial user object from provider if db lookup fails
            token.id = user.id;
@@ -124,21 +139,24 @@ export const authConfig = {
            token.email = user.email;
            token.image = user.image;
            // @ts-ignore
-           token.role = user.role; // Add role to token
+           token.role = user.role;
         }
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
-        session.user.name = token.name;
-        session.user.email = token.email;
-        session.user.image = token.image as string | undefined;
+        const userWithDetails = session.user as User;
+        userWithDetails.id = token.id as string;
+        userWithDetails.name = token.name;
+        userWithDetails.email = token.email;
+        userWithDetails.image = token.image as string | undefined;
+        userWithDetails.createdAt = token.createdAt as string;
+        userWithDetails.role = token.role as UserRole;
         // @ts-ignore
-        session.user.createdAt = token.createdAt;
-        // @ts-ignore
-        session.user.role = token.role; // Add role to session
+        userWithDetails.addresses = token.addresses;
+         // @ts-ignore
+        userWithDetails.paymentMethods = token.paymentMethods;
       }
       return session;
     },

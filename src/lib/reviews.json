@@ -1,0 +1,27 @@
+
+[
+  {
+    "id": "rev-1",
+    "productId": "1",
+    "author": "Jane D.",
+    "rating": 5,
+    "comment": "Absolutely stunning vase! The colors are so vibrant and it looks even better in person.",
+    "date": "2023-05-15"
+  },
+  {
+    "id": "rev-2",
+    "productId": "1",
+    "author": "Mike S.",
+    "rating": 4,
+    "comment": "Great quality and beautiful design. A bit smaller than I expected, but still lovely.",
+    "date": "2023-06-02"
+  },
+  {
+    "id": "rev-3",
+    "productId": "2",
+    "author": "Priya K.",
+    "rating": 5,
+    "comment": "The scarf is so soft and the block print is perfect. I get so many compliments!",
+    "date": "2023-04-20"
+  }
+]

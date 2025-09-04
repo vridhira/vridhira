@@ -1,6 +1,6 @@
 
 
-import { User } from './types';
+import { Review, Order } from './types';
 
 // --- MOCK DATA --- //
 // In a real application, this data would be fetched from a database or API.
@@ -18,7 +18,7 @@ export type Product = {
 };
 
 export type Category = {
-  name: string;
+  name:string;
   image: string;
   data_ai_hint: string;
 };
@@ -29,29 +29,6 @@ export type Artisan = {
   location: string;
   bio: string;
   profileImage: string;
-};
-
-export type Review = {
-    id: string;
-    productId: string;
-    author: string;
-    rating: number;
-    comment: string;
-    date: string;
-};
-
-export type Order = {
-  id: string;
-  userId: string;
-  date: string;
-  status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
-  total: number;
-  items: {
-    productId: string;
-    name: string;
-    quantity: number;
-    price: number;
-  }[];
 };
 
 
@@ -161,11 +138,6 @@ export const reviews: Review[] = [
     { id: 'rev-2', productId: '1', author: 'Mike S.', rating: 4, comment: 'Great quality and beautiful design. A bit smaller than I expected, but still lovely.', date: '2023-06-02' },
     { id: 'rev-3', productId: '2', author: 'Priya K.', rating: 5, comment: 'The scarf is so soft and the block print is perfect. I get so many compliments!', date: '2023-04-20' },
 ];
-
-const mockUsers: User[] = [
-    { id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', role: 'user', isVerified: true },
-    { id: 'user-2', firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com', role: 'user', isVerified: true },
-]
 
 const orders: Order[] = [
     {

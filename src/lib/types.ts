@@ -4,6 +4,25 @@ import { Product } from "./data";
 
 export type UserRole = 'user' | 'shopkeeper' | 'admin' | 'owner';
 
+export interface Address {
+  id: string;
+  fullName: string;
+  streetAddress: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  isDefault?: boolean;
+}
+
+export interface PaymentMethod {
+    id: string;
+    cardType: string;
+    last4: string;
+    expiryDate: string;
+    isDefault?: boolean;
+}
+
 export interface User {
   id: string;
   firstName: string;
@@ -16,6 +35,8 @@ export interface User {
   createdAt?: string;
   role: UserRole;
   isVerified: boolean; // Added for email verification
+  addresses?: Address[];
+  paymentMethods?: PaymentMethod[];
 }
 
 export interface Shop {
@@ -36,4 +57,13 @@ export interface OtpAttempt {
 
 export interface CartItem extends Product {
   quantity: number;
+}
+
+export interface Review {
+    id: string;
+    productId: string;
+    author: string;
+    rating: number;
+    comment: string;
+    date: string;
 }

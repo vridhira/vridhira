@@ -5,7 +5,7 @@
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcrypt';
-import { User, UserRole } from './types';
+import { User, UserRole, Address, PaymentMethod } from './types';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 
@@ -104,6 +104,8 @@ export const createUser = async (userData: Partial<User>): Promise<User> => {
     createdAt: new Date().toISOString(),
     role: userData.role || 'user', // Assign role from data or default to 'user'
     isVerified: !!userData.id, // Mark as verified if it's a social login (has profile.sub id)
+    addresses: [],
+    paymentMethods: [],
   };
 
   users.push(newUser);
@@ -113,18 +115,29 @@ export const createUser = async (userData: Partial<User>): Promise<User> => {
   return userWithoutPassword;
 };
 
-export const updateUserPassword = async (phoneNumber: string, newPassword: string): Promise<void> => {
+export const updateUserPassword = async (email: string, currentPassword: string,newPassword: string): Promise<{success: boolean, error?: string}> => {
     const users = readUsers();
-    const userIndex = users.findIndex(u => u.phoneNumber === phoneNumber);
+    const userIndex = users.findIndex(u => u.email === email);
 
     if (userIndex === -1) {
-        throw new Error("User not found.");
+        return { success: false, error: "User not found." };
+    }
+
+    const user = users[userIndex];
+    if (!user.password) {
+        return { success: false, error: "Password not set for this account. Try social login." };
+    }
+    
+    const passwordsMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!passwordsMatch) {
+         return { success: false, error: "Current password does not match." };
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     users[userIndex].password = hashedPassword;
 
     writeUsers(users);
+    return { success: true };
 }
 
 export const deleteUser = async (userId: string): Promise<{ success: boolean }> => {
@@ -280,3 +293,35 @@ export const handleRoleChange = async (userId: string, role: UserRole) => {
       return { error: error.message || 'An unexpected error occurred.' };
     }
   };
+
+export const updateUserAddresses = async (userId: string, addresses: Address[]): Promise<{success: boolean, error?: string}> => {
+    try {
+        const users = readUsers();
+        const userIndex = users.findIndex(u => u.id === userId);
+        if (userIndex === -1) {
+            return { success: false, error: 'User not found.' };
+        }
+        users[userIndex].addresses = addresses;
+        writeUsers(users);
+        revalidatePath('/account');
+        return { success: true };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+};
+
+export const updateUserPayments = async (userId: string, payments: PaymentMethod[]): Promise<{success: boolean, error?: string}> => {
+    try {
+        const users = readUsers();
+        const userIndex = users.findIndex(u => u.id === userId);
+        if (userIndex === -1) {
+            return { success: false, error: 'User not found.' };
+        }
+        users[userIndex].paymentMethods = payments;
+        writeUsers(users);
+        revalidatePath('/account');
+        return { success: true };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+};

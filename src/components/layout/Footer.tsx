@@ -1,9 +1,27 @@
+
+'use client';
 import Link from "next/link"
 import { Logo } from "@/components/Logo"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast";
+import { FormEvent } from "react";
 
 export function Footer() {
+  const { toast } = useToast();
+
+  const handleSubscribe = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const email = (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value;
+    if (email) {
+      toast({
+        title: "Subscribed!",
+        description: "Thank you for subscribing to our newsletter.",
+      });
+      (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value = '';
+    }
+  }
+
   return (
     <footer className="bg-muted text-muted-foreground">
       <div className="container py-12">
@@ -36,8 +54,8 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-foreground mb-4">Newsletter</h3>
             <p className="text-sm mb-2">Subscribe for updates and special offers.</p>
-            <form className="flex gap-2">
-              <Input type="email" placeholder="Your email" className="bg-background" />
+            <form className="flex gap-2" onSubmit={handleSubscribe}>
+              <Input name="email" type="email" placeholder="Your email" className="bg-background" required />
               <Button type="submit" variant="default">Subscribe</Button>
             </form>
           </div>
