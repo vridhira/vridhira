@@ -1,6 +1,8 @@
 
 import { Product } from "./data";
 
+export type UserRole = 'user' | 'shopkeeper' | 'admin' | 'owner';
+
 export interface User {
   id: string;
   firstName: string;
@@ -11,6 +13,7 @@ export interface User {
   image?: string;
   name?: string;
   createdAt?: string;
+  role: UserRole;
 }
 
 export interface OtpAttempt {

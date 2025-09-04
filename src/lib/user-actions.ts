@@ -92,6 +92,7 @@ export const createUser = async (userData: Partial<User>): Promise<User> => {
     password: hashedPassword,
     image: userData.image,
     createdAt: new Date().toISOString(),
+    role: 'user', // Assign default role
   };
 
   users.push(newUser);

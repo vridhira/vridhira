@@ -1,3 +1,4 @@
+
 [
   {
     "id": "1756721694952",
@@ -5,7 +6,8 @@
     "lastName": "singh",
     "email": "kumaraloke23@gmail.com",
     "phoneNumber": "+919911459716",
-    "password": "$2b$10$q5Z/cU8kNBVBGcUJDWi/wOHp.LfI9KXbWrZNfvnCqRzhgNiC5VNWu"
+    "password": "$2b$10$q5Z/cU8kNBVBGcUJDWi/wOHp.LfI9KXbWrZNfvnCqRzhgNiC5VNWu",
+    "role": "owner"
   },
   {
     "id": "101326878748707276296",
@@ -13,7 +15,8 @@
     "lastName": "Shroff",
     "email": "hk8913114@gmail.com",
     "image": "https://lh3.googleusercontent.com/a/ACg8ocKdKYHFFn069yQDWblIy8GnLyI5IdmVaOm-MeG-BReSdnFA_L4H=s96-c",
-    "createdAt": "2025-09-01T11:41:57.013Z"
+    "createdAt": "2025-09-01T11:41:57.013Z",
+    "role": "user"
   },
   {
     "id": "1756960408022",
@@ -22,6 +25,7 @@
     "email": "swatisom.2007@gmail.com",
     "phoneNumber": "+917042493416",
     "password": "$2b$10$nLyzel/P47165ap0N/0nV.AN2CUUcYHCeG/.x6GgS3qY9WLT4ulR6",
-    "createdAt": "2025-09-04T04:33:28.022Z"
+    "createdAt": "2025-09-04T04:33:28.022Z",
+    "role": "user"
   }
 ]
