@@ -1,4 +1,3 @@
-
 [
   {
     "id": "1756721694952",
@@ -7,7 +6,7 @@
     "email": "kumaraloke23@gmail.com",
     "phoneNumber": "+919911459716",
     "password": "$2b$10$q5Z/cU8kNBVBGcUJDWi/wOHp.LfI9KXbWrZNfvnCqRzhgNiC5VNWu",
-    "role": "admin",
+    "role": "user",
     "isVerified": true
   },
   {
@@ -37,7 +36,7 @@
     "lastName": "Kumar",
     "email": "ramesh.kumar@vridhira.com",
     "password": "$2a$10$GNa3gJ.G9g4QzPqjEaB7W.L4.F8Hw.YcXeIrF6eL/3nBvJ7bQe2vO",
-    "role": "shopkeeper",
+    "role": "user",
     "isVerified": true,
     "createdAt": "2024-09-07T10:00:00.000Z"
   },

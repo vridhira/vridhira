@@ -7,6 +7,7 @@ import path from 'path';
 import bcrypt from 'bcrypt';
 import { User, UserRole } from './types';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/auth';
 
 // --- DEVELOPMENT ONLY --- //
 // This is a simple file-based user store for development purposes.
@@ -43,6 +44,12 @@ export const findUserByEmail = async (email: string): Promise<User | undefined> 
   const users = readUsers();
   return users.find((user) => user.email === email);
 };
+
+export const findUserById = async (userId: string): Promise<User | undefined> => {
+  if (!userId) return undefined;
+  const users = readUsers();
+  return users.find((user) => user.id === userId);
+}
 
 export const findUserByPhoneNumber = async (phoneNumber: string): Promise<User | undefined> => {
     if (!phoneNumber) return undefined;
@@ -164,29 +171,59 @@ export const getAllUsers = async (): Promise<User[]> => {
     return users.map(({ password, ...user }) => user);
 };
 
-export const updateUserRole = async (userId: string, role: UserRole): Promise<User> => {
-    const users = readUsers();
-    const userIndex = users.findIndex(u => u.id === userId);
+export const updateUserRole = async (userId: string, newRole: UserRole): Promise<void> => {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error('Not authenticated.');
+  }
 
-    if (userIndex === -1) {
-        throw new Error('User not found');
-    }
+  const actor = await findUserById(session.user.id);
+  if (!actor) {
+    throw new Error('Action performer not found.');
+  }
+  
+  const users = readUsers();
+  const targetUserIndex = users.findIndex(u => u.id === userId);
 
-    users[userIndex].role = role;
-    writeUsers(users);
-    
-    const { password, ...updatedUser } = users[userIndex];
-    return updatedUser;
+  if (targetUserIndex === -1) {
+    throw new Error('Target user not found.');
+  }
+  
+  const targetUser = users[targetUserIndex];
+
+  // Rule: No one can change an owner's role.
+  if (targetUser.role === 'owner') {
+    throw new Error("Cannot change the role of an owner.");
+  }
+  
+  // Rule: Only owners can promote users to 'admin'.
+  if (newRole === 'admin' && actor.role !== 'owner') {
+    throw new Error("Only an owner can promote users to admin.");
+  }
+  
+  // Rule: Admins cannot manage other admins.
+  if (actor.role === 'admin' && targetUser.role === 'admin') {
+      throw new Error("Admins cannot manage other admins.");
+  }
+
+  // Rule: Users and Shopkeepers cannot change roles.
+  if (actor.role === 'user' || actor.role === 'shopkeeper') {
+      throw new Error("You do not have permission to change roles.");
+  }
+
+  users[targetUserIndex].role = newRole;
+  writeUsers(users);
 }
 
 export const handleRoleChange = async (userId: string, role: UserRole) => {
     'use server';
     try {
       await updateUserRole(userId, role);
-      revalidatePath('/dashboard');
-    } catch (error) {
+      revalidatePath('/dashboard'); // Revalidate to show changes
+    } catch (error: any) {
       console.error("Failed to update role:", error);
-      return { error: 'Failed to update role.' };
+      // Return the specific error message to the client
+      return { error: error.message || 'An unknown error occurred.' };
     }
   };
 

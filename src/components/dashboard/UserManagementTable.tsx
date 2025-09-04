@@ -15,37 +15,47 @@ import {
 import { Button } from '../ui/button';
 import { MoreHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 
 interface UserManagementTableProps {
   users: User[];
   onRoleChange: (userId: string, role: UserRole) => Promise<{ error?: string } | void>;
-  isOwner: boolean;
+  currentActor: User; // The currently logged-in user performing the action
 }
 
-const ROLES: UserRole[] = ['user', 'shopkeeper', 'admin', 'owner'];
+const ROLES_HIERARCHY: { [key in UserRole]: number } = {
+  user: 1,
+  shopkeeper: 2,
+  admin: 3,
+  owner: 4,
+};
 
-export function UserManagementTable({ users, onRoleChange, isOwner }: UserManagementTableProps) {
+const ROLES: UserRole[] = ['user', 'shopkeeper', 'admin']; // Roles that can be assigned
+
+export function UserManagementTable({ users, onRoleChange, currentActor }: UserManagementTableProps) {
+  const { data: session } = useSession();
   const { toast } = useToast();
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState<string | null>(null);
 
-  const handleRoleSelect = async (userId: string, role: UserRole) => {
-    setIsSubmitting(userId);
-    const result = await onRoleChange(userId, role);
+  const handleRoleSelect = async (targetUser: User, newRole: UserRole) => {
+    setIsSubmitting(targetUser.id);
+    const result = await onRoleChange(targetUser.id, newRole);
     if (result?.error) {
       toast({
-        title: 'Error',
+        title: 'Permission Denied',
         description: result.error,
         variant: 'destructive',
       });
     } else {
       toast({
         title: 'Success!',
-        description: `User role has been updated to ${role}.`,
+        description: `User ${targetUser.email}'s role has been updated to ${newRole}.`,
       });
-      // Force a server-side data refresh by reloading the page.
-      router.refresh(); 
+
+      // If the user changed their own role, sign them out to apply changes
+      if (targetUser.id === session?.user?.id) {
+        await signOut({ callbackUrl: '/' });
+      }
     }
     setIsSubmitting(null);
   };
@@ -64,6 +74,24 @@ export function UserManagementTable({ users, onRoleChange, isOwner }: UserManage
     }
   }
 
+  const canChangeRole = (targetRole: UserRole) => {
+    const actorRole = currentActor.role;
+    const actorLevel = ROLES_HIERARCHY[actorRole];
+    const targetLevel = ROLES_HIERARCHY[targetRole];
+
+    if (actorRole === 'owner') return true; // Owner can manage anyone
+    if (actorRole === 'admin') return targetLevel < actorLevel; // Admin can manage shopkeepers and users
+    
+    return false;
+  };
+  
+  const canBePromotedTo = (newRole: UserRole) => {
+      // Only owners can promote users to 'admin'
+      if (newRole === 'admin') {
+          return currentActor.role === 'owner';
+      }
+      return true;
+  }
 
   return (
     <Table>
@@ -97,19 +125,27 @@ export function UserManagementTable({ users, onRoleChange, isOwner }: UserManage
               <Badge variant={getRoleBadgeVariant(user.role)}>{user.role}</Badge>
             </TableCell>
             <TableCell className="text-right">
-              {isOwner ? (
+              {canChangeRole(user.role) ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" disabled={!!isSubmitting}>
-                      <MoreHorizontal className="h-4 w-4" />
+                      {isSubmitting === user.id ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
+                      ) : (
+                        <MoreHorizontal className="h-4 w-4" />
+                      )}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     {ROLES.map((role) => (
                       <DropdownMenuItem
                         key={role}
-                        onClick={() => handleRoleSelect(user.id, role)}
-                        disabled={user.role === role || !!isSubmitting || role === 'owner'}
+                        onClick={() => handleRoleSelect(user, role)}
+                        disabled={
+                           user.role === role || 
+                           !!isSubmitting ||
+                           !canBePromotedTo(role)
+                        }
                       >
                         Promote to {role.charAt(0).toUpperCase() + role.slice(1)}
                       </DropdownMenuItem>

@@ -1,11 +1,12 @@
 
+
 'use server';
 
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getAllUsers, handleRoleChange } from '@/lib/user-actions';
+import { getAllUsers, handleRoleChange, findUserById } from '@/lib/user-actions';
 import { UserManagementTable } from '@/components/dashboard/UserManagementTable';
 import { UserList } from '@/components/dashboard/UserList';
 import { UpsertUserDialog } from '@/components/dashboard/UpsertUserDialog';
@@ -17,19 +18,25 @@ import { AddProductDialog } from '@/components/dashboard/AddProductDialog';
 export default async function DashboardPage() {
   const session = await auth();
   const user = session?.user;
-  const userRole = user?.role;
 
-  if (!user || !userRole || !['owner', 'admin', 'shopkeeper'].includes(userRole)) {
+  if (!user || !user.id || !user.role || !['owner', 'admin', 'shopkeeper'].includes(user.role)) {
     redirect('/');
   }
-
-  const isOwner = userRole === 'owner';
-  const isAdmin = userRole === 'admin';
-  const isShopkeeper = userRole === 'shopkeeper';
   
-  // Conditionally render based on role
+  // We need to fetch the full, most up-to-date user object from our database
+  // to ensure the role is current and not from a stale session.
+  const currentActor = await findUserById(user.id);
+  
+  if (!currentActor || !['owner', 'admin', 'shopkeeper'].includes(currentActor.role)) {
+       redirect('/');
+  }
+
+  const isOwner = currentActor.role === 'owner';
+  const isAdmin = currentActor.role === 'admin';
+  const isShopkeeper = currentActor.role === 'shopkeeper';
+  
   if (isShopkeeper) {
-      const shopProducts = await getProductsByArtisan(user.id);
+      const shopProducts = await getProductsByArtisan(currentActor.id);
       return (
         <div className="container mx-auto py-12">
            <header className="mb-10">
@@ -42,7 +49,7 @@ export default async function DashboardPage() {
                     <CardTitle>My Products</CardTitle>
                     <CardDescription>View, add, and manage the products in your shop.</CardDescription>
                  </div>
-                 <AddProductDialog artisanId={user.id} />
+                 <AddProductDialog artisanId={currentActor.id} />
               </CardHeader>
               <CardContent>
                   <ProductManagementTable products={shopProducts} />
@@ -69,7 +76,8 @@ export default async function DashboardPage() {
           <TabsTrigger value="users">All Users</TabsTrigger>
           <TabsTrigger value="shopkeepers">Shopkeepers</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
-          <TabsTrigger value="admins">Admins</TabsTrigger>
+
+          {isOwner && <TabsTrigger value="admins">Admins</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="users">
@@ -79,10 +87,10 @@ export default async function DashboardPage() {
                 <CardTitle>User Management</CardTitle>
                 <CardDescription>View, manage, and assign roles to all users in the system.</CardDescription>
               </div>
-              {isOwner && <UpsertUserDialog />}
+              {(isOwner || isAdmin) && <UpsertUserDialog />}
             </CardHeader>
             <CardContent>
-                <UserManagementTable users={users} onRoleChange={handleRoleChange} isOwner={isOwner} />
+                <UserManagementTable users={users} onRoleChange={handleRoleChange} currentActor={currentActor} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -106,25 +114,27 @@ export default async function DashboardPage() {
                     <CardTitle>Product Management</CardTitle>
                     <CardDescription>View and manage all products in the marketplace.</CardDescription>
                  </div>
-                 <AddProductDialog artisanId={user.id} />
+                 <AddProductDialog artisanId={currentActor.id} />
               </CardHeader>
               <CardContent>
                   <ProductManagementTable products={allProducts} />
               </CardContent>
             </Card>
         </TabsContent>
-
+        
+        {isOwner && (
          <TabsContent value="admins">
             <Card>
               <CardHeader>
                 <CardTitle>Admin Management</CardTitle>
-                <CardDescription>All users with the 'admin' role. Owners can promote or demote admins.</CardDescription>
+                <CardDescription>All users with the 'admin' role. Only owners can promote or demote admins.</CardDescription>
               </CardHeader>
               <CardContent>
                   <UserList users={admins} />
               </CardContent>
             </Card>
         </TabsContent>
+        )}
 
       </Tabs>
     </div>
