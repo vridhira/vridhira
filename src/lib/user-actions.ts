@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcrypt';
 import { User, UserRole } from './types';
+import { revalidatePath } from 'next/cache';
 
 // --- DEVELOPMENT ONLY --- //
 // This is a simple file-based user store for development purposes.
@@ -146,8 +147,9 @@ export const findOrCreateUser = async (profile: Partial<User>): Promise<User> =>
 }
 
 export const getAllUsers = async (): Promise<User[]> => {
-    return readUsers();
-}
+    const users = readUsers();
+    return users.map(({ password, ...user }) => user);
+};
 
 export const updateUserRole = async (userId: string, role: UserRole): Promise<User> => {
     const users = readUsers();
@@ -163,3 +165,14 @@ export const updateUserRole = async (userId: string, role: UserRole): Promise<Us
     const { password, ...updatedUser } = users[userIndex];
     return updatedUser;
 }
+
+export const handleRoleChange = async (userId: string, role: UserRole) => {
+    'use server';
+    try {
+      await updateUserRole(userId, role);
+      revalidatePath('/dashboard');
+    } catch (error) {
+      console.error("Failed to update role:", error);
+      return { error: 'Failed to update role.' };
+    }
+  };

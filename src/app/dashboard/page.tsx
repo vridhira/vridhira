@@ -5,10 +5,8 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getAllUsers, updateUserRole } from '@/lib/user-actions';
+import { getAllUsers, handleRoleChange } from '@/lib/user-actions';
 import { UserManagementTable } from '@/components/dashboard/UserManagementTable';
-import type { User, UserRole } from '@/lib/types';
-
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -19,17 +17,6 @@ export default async function DashboardPage() {
 
   const users = await getAllUsers();
   
-  const handleRoleChange = async (userId: string, role: UserRole) => {
-    'use server';
-    try {
-      await updateUserRole(userId, role);
-    } catch (error) {
-      console.error("Failed to update role:", error);
-      return { error: 'Failed to update role.' };
-    }
-  };
-
-
   return (
     <div className="container mx-auto py-12">
       <header className="mb-10">
