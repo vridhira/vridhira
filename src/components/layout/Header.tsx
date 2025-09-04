@@ -53,10 +53,10 @@ export function Header() {
       )
     }
     
-    if (session) {
-      // @ts-ignore
-      const userRole = session.user?.role;
-      const canAccessDashboard = userRole === 'owner' || userRole === 'admin' || userRole === 'shopkeeper';
+    if (session?.user) {
+      // @ts-ignore - 'role' is added in the session callback
+      const userRole = session.user.role;
+      const canAccessDashboard = userRole && ['owner', 'admin', 'shopkeeper'].includes(userRole);
       
       const getDashboardLabel = () => {
         switch(userRole) {
@@ -71,38 +71,38 @@ export function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="h-9 w-9 cursor-pointer">
-              <AvatarImage src={session.user?.image ?? ''} alt={session.user?.name ?? 'User'} />
-              <AvatarFallback>{session.user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarImage src={session.user.image ?? ''} alt={session.user.name ?? 'User'} />
+              <AvatarFallback>{session.user.name?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{session.user?.name}</p>
+                <p className="text-sm font-medium leading-none">{session.user.name}</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  {session.user?.email}
+                  {session.user.email}
                 </p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <Link href="/account" passHref>
               <DropdownMenuItem>
-                <User className="mr-2" />
-                My Account
+                <User className="mr-2 h-4 w-4" />
+                <span>My Account</span>
               </DropdownMenuItem>
             </Link>
              {canAccessDashboard && (
                 <Link href="/dashboard" passHref>
                     <DropdownMenuItem>
-                        <LayoutDashboard className="mr-2" />
-                        {getDashboardLabel()}
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>{getDashboardLabel()}</span>
                     </DropdownMenuItem>
                 </Link>
              )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="mr-2" />
-              Log out
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
